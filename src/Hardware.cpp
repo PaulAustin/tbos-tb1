@@ -67,7 +67,7 @@ void HW_Init()
 
 	CHIP_Init();			// Chip specific Errata Init
 
-	HW_HFXO_Init();			// Start the external Crystal Osc
+	HW_HFXO_Init();			// Start the external crystal oscillator
 
 	HW_CMU_Init();			// Individual Peripheral Clocks are enabled as needed
 

@@ -2,7 +2,8 @@
 Code for the tbos kernel for efm32 cortex-m0
 
 # Building
-The project is built with Simplicity Studio from Silicon Laboratories, Inc.
+The project is built with [Simplicity Studio](https://www.silabs.com/products/development-tools/software/simplicity-studio) from Silicon Laboratories, Inc.
+
 
 # Licensing
 * Files in the 'src' directory is covered by the MIT license.

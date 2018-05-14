@@ -9,6 +9,8 @@ private:
 	Value noteHertz;
 	Value noteStatus;
 
+	int _noteTimeRemaining = 0;
+
 public:
 	void Init();
 	void Run();

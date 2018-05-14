@@ -27,9 +27,6 @@ public:
 	virtual int  Read() {
 		return _value;
 	}
-	int  Read2() {
-		return _value;
-	}
 	virtual bool Updated() {
 		bool c = (_value != _newValue);
 		_value = _newValue;

@@ -69,7 +69,7 @@ public:
 	void Init();  // global constructors cause problems since they are before main
 	void SetValueObj(int id, Value* vobj) { _registers[id] = vobj; }
 	void Write(int id, int value)  { _registers[id]->Set(value); }
-	int Read(int id)  { return _registers[id]->Read2(); }
+	int Read(int id)  { return _registers[id]->Read(); }
 	void WriteDotted(int id, int dotted, int value);
 	bool Changed(int id);
 };

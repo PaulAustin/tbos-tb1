@@ -9,16 +9,15 @@
 
 
 Value gChargeStatus;
+Value gVersion;
 
 
 int main(void)
 {
 
-	/* Chip errata */
 	gRMap.Init();
 	HW_Init();
 
-//	Sys_Status_Init();
 	gSound.Init();
 	gEncoders.Init();
 	gMotor.Init();
@@ -33,10 +32,14 @@ int main(void)
 	GPIO_Write(O4, 1);
 	GPIO_Write(MOT2_R, 0);
 	GPIO_Write(MOT1_R, 0);
-
 	GPIO_Write(O4, 2);
 
-	int bootNote = 1;
+	gRMap.SetValueObj(kRM_SystemFMVers1, &gVersion);
+	gVersion.Set(0x01000002);
+
+
+
+	int bootNote = 3;
 	int bootNotes[] = {0, 261, 329, 195, -1};
 	int chargeStat = 0;
     int i= 0;
@@ -56,6 +59,17 @@ int main(void)
 			//chargeStat = BQ_ChargeStatus();
 			chargeStat = GPIO_Read(CHG_STAT);
 			gChargeStatus.Set(chargeStat);
+
+			if (bootNote >= 0) {
+				int pitch = bootNotes[bootNote];
+				if (pitch > 0) {
+					HW_Timer1_SetFreq(pitch);
+					HW_Timer1_Enable(true);  // Start Playing
+				} else if (pitch == 0){
+					HW_Timer1_Enable(false);  // Stop Playing
+				}
+				bootNote--;
+			}
 		}
 
 		if ( gTimer.is_500msec() ) {
@@ -72,16 +86,6 @@ int main(void)
 				BQ_IinLim(kBQ_IinLimit_500mA);
 			}
 
-			if (bootNote >= 0) {
-				int pitch = bootNotes[bootNote];
-				if (pitch > 0) {
-					HW_Timer1_SetFreq(pitch);
-					HW_Timer1_Enable(true);  // Start Playing
-				} else if (pitch == 0){
-					HW_Timer1_Enable(false);  // Stop Playing
-				}
-				bootNote--;
-			}
 		}
 	}
 }
