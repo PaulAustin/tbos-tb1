@@ -31,9 +31,9 @@ enum
 class Encoder {
 public:
 	// ValueRegisters
-	Value 	_ppr;
-	Value 	_count;
-	Value 	_rpm;
+	AValue 	_ppr;
+	AValue 	_count;
+	AValue 	_rpm;
 	int		_lastCount;
 	// Used by ISR
 	int 	_countEdge;  // count on A edge
@@ -43,7 +43,7 @@ public:
 class EncoderManager
 {
 public:
-	Value _resetTrigger;
+	AValue _resetTrigger;
 	void 	Init();
 	void 	RunISR();
 	void 	CalckRPM(int);

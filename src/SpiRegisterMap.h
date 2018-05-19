@@ -64,12 +64,12 @@ enum RegMap_t
 
 class RegisterMap {
 public:
-	Value* _registers[kRM_Count];
+	AValue* _registers[kRM_Count];
 public:
 	void Init();  // global constructors cause problems since they are before main
-	void SetValueObj(int id, Value* vobj) { _registers[id] = vobj; }
-	void Write(int id, int value)  { _registers[id]->Set(value); }
-	int Read(int id)  { return _registers[id]->Read(); }
+	void SetValueObj(int id, AValue* vobj) { _registers[id] = vobj; }
+	void ASet(int id, int value)  { _registers[id]->ASet(value); }
+	int Get(int id)  { return _registers[id]->Get(); }
 	void WriteDotted(int id, int dotted, int value);
 	bool Changed(int id);
 };

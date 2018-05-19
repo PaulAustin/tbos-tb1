@@ -37,11 +37,13 @@ void SoundManager::Init(void)
 {
 	// Default 60 BPM
 	noteTempo.Set(60);
+	noteTempo.Reset();
 	// Length of note in 16th notes
 	noteLength.Set(125);
+	noteLength.Reset();
 
-	noteLength.Updated();
-	noteTempo.Updated();
+	// Turn on op-amp for speaker
+	GPIO_Write(SPK_EN, 1);
 
 	gRMap.SetValueObj(kRM_NoteTempo, &noteTempo);
 	gRMap.SetValueObj(kRM_NoteLength, &noteLength);
@@ -52,7 +54,7 @@ void SoundManager::Init(void)
 void SoundManager::PluckFrequency(int f)
 {
 	// Start a new note
-	_noteTimeRemaining = noteLength.Read();
+	_noteTimeRemaining = noteLength.Get();
 
 	if (f > 0 && f <= 5000) {
 		HW_Timer1_SetFreq(f);
@@ -65,10 +67,10 @@ void SoundManager::PluckFrequency(int f)
 }
 void SoundManager::Run(void)
 {
-	if (noteHertz.Updated()) {
-		PluckFrequency(noteHertz.Read());
-	} else if (noteSolfege.Updated()) {
-		int n = noteSolfege.Read();
+	if (noteHertz.HasAsyncSet()) {
+		PluckFrequency(noteHertz.Get());
+	} else if (noteSolfege.HasAsyncSet()) {
+		int n = noteSolfege.Get();
 		if (n < 0 || n >= COUNT_OF(sNotesChromatic))
 			n = 0;
 		PluckFrequency(sNotesChromatic[n]);
@@ -78,7 +80,7 @@ void SoundManager::Run(void)
 		_noteTimeRemaining--;
 
 		if (_noteTimeRemaining == 0) {
-			noteHertz.Set(0);
+			noteHertz.ASet(0);
 			noteSolfege.Set(0);
 			HW_Timer1_SetFreq(0);
 			HW_Timer1_Enable(false);  // Start Playing

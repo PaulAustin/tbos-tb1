@@ -10,51 +10,75 @@
 
 #define COUNT_OF(x) ((int)(sizeof(x)/sizeof(0[x])))
 
+// Async Values - designed to be set in an ISR and read by a fore ground process
+// In the ISR there is always a 'value' set. The symantics of setting that value
+// may vary depeding on the specific class type.
 
-class Value {
+
+class ATrigger {
+protected:
+	int _aValue;
+public:
+	ATrigger() {
+		_aValue = 0;
+	}
+	virtual ~ATrigger() {};
+	virtual void ASet(int) {
+		// Ignore the value, just mark as set.
+		_aValue = true;
+	}
+	virtual bool HasAsyncSet(int) {
+		bool n = _aValue;
+		_aValue = false;
+		return n;
+	}
+	virtual void Reset() {
+		_aValue = false;
+	}
+};
+
+class AValue : ATrigger {
 protected:
 	int _value;
-	int _newValue;
 public:
-	Value() {
-		_value = _newValue = 0;
+	AValue() {
+		_value = 0;
 	}
-	virtual ~Value() {};
+	virtual ~AValue() {};
 
-	virtual void Set(int value) {
-		_newValue =  value;
+	virtual void ASet(int value) {
+		_aValue = value;
 	}
-	virtual int  Read() {
+	virtual void Set(int value) {
+		_value = value;
+		_aValue = value;
+	}
+	virtual int  Get() {
 		return _value;
 	}
-	virtual bool Updated() {
-		bool c = (_value != _newValue);
-		_value = _newValue;
-		return c;
+	virtual bool HasAsyncSet() {
+		bool n = (_value != _aValue);
+		_value = _aValue;
+		return n;
 	}
-
-};
-
-class TriggerValue : Value {
-//	virtual void Set(int)					{ _newValue = 1; }
-};
-
-
-class SlewValue : Value {
-
+	virtual void Reset() {
+		_value = _aValue;
+	}
 };
 
 
-class LinMapValue : Value {
 
+class SlewValue : AValue {
 };
 
-class OscValue : Value {
 
+class LinMapValue : AValue {
 };
 
-class PIPValue : Value {
+class OscValue : AValue {
+};
 
+class PIPValue : AValue {
 };
 
 

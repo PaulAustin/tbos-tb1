@@ -43,6 +43,13 @@ MotorManager gMotor;
 
 void MotorManager::Init(void)
 {
+	// Clear GPI for the HBridge so no power to the motor.
+	GPIO_Write(MOT1_F, 0);
+	GPIO_Write(MOT1_R, 0);
+	GPIO_Write(MOT2_F, 0);
+	GPIO_Write(MOT2_R, 0);
+	GPIO_Write(MOT_NSLEEP, 1);
+
 	pwmWidth = 10;
 	pwmTic = 0;
 
@@ -52,13 +59,6 @@ void MotorManager::Init(void)
 	gRMap.SetValueObj(kRM_Motor1Break, &_break1);
 	gRMap.SetValueObj(kRM_Motor2Break, &_break2);
 
-
-	// Clear GPI for the HBridge so no power to the motor.
-	GPIO_Write(MOT1_F, 0);
-	GPIO_Write(MOT1_R, 0);
-	GPIO_Write(MOT2_F, 0);
-	GPIO_Write(MOT2_R, 0);
-	GPIO_Write(MOT_NSLEEP, 1);
 }
 
 #define MOTOR_TUNING_INTERVAL 20
@@ -71,7 +71,7 @@ the motors.
 / ---------------------------------------------------------------------------*/
 bool MotorManager::Idle()
 {
-	return (gMotor._power1.Read() == 0 && gMotor._power2.Read() == 0);
+	return (gMotor._power1.Get() == 0 && gMotor._power2.Get() == 0);
 }
 
 /*----------------------------------------------------------------------------
@@ -84,13 +84,13 @@ void MotorManager::Run()
 {
 	int w1,w2 = 0;
 
-	if (_power1.Updated()) {
-		w1 = _power1.Read();
+	if (_power1.HasAsyncSet()) {
+		w1 = _power1.Get();
 		SetPower(kMOTOR_1, w1);
 	}
 
-	if (_power2.Updated()) {
-		w2 = _power2.Read();
+	if (_power2.HasAsyncSet()) {
+		w2 = _power2.Get();
 		SetPower(kMOTOR_2, w2);
 	}
 }

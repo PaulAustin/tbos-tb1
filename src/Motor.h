@@ -2,10 +2,10 @@
 #include "Value.h"
 
 class MotorManager {
-	Value _power1;
-	Value _power2;
-	Value _break1;
-	Value _break2;
+	AValue _power1;
+	AValue _power2;
+	AValue _break1;
+	AValue _break2;
 public:
 	void Init();
 	void Run();

@@ -3,13 +3,12 @@
 
 class SoundManager {
 private:
-	Value noteTempo;
-	Value noteLength;
-	Value noteSolfege;
-	Value noteHertz;
-	Value noteStatus;
-
-	int _noteTimeRemaining = 0;
+	AValue noteTempo;
+	AValue noteLength;
+	AValue noteSolfege;
+	AValue noteHertz;
+	AValue noteStatus;
+	int _noteTimeRemaining;
 
 public:
 	void Init();

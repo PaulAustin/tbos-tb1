@@ -12,7 +12,7 @@
 #define SPICHAR_ACK			0xAC
 
 RegisterMap gRMap;
-Value		gDummyValue;
+AValue		gDummyValue;
 
 void RegisterMap::Init()
 {
@@ -59,7 +59,7 @@ extern "C" void USART0_RX_IRQHandler(void)
 				gPacketState = psSetReg;
 			} else if (gReg < 0 && gReg > -kRM_Count) {
 				gPacketState = psGetReg;
-				gIntOut = gRMap._registers[-gReg]->Read();
+				gIntOut = gRMap._registers[-gReg]->Get();
 			} else {
 				gReg = 0;
 				// stay in command state
@@ -69,7 +69,7 @@ extern "C" void USART0_RX_IRQHandler(void)
 			// Once the value has been fully read
 			// write it into the map.
 			gParam = gV8Reader.Value();
-			gRMap.Write(gReg, gParam);
+			gRMap.ASet(gReg, gParam);
 			gReg = gParam = 0;
 			gPacketState = psCommand;
 			break;

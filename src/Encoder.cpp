@@ -65,7 +65,7 @@ Name: Encoder_Run
 void EncoderManager::Run(void)
 {
 	// See if encoder clear register was written to.
-	if ( _resetTrigger.Updated() ) {
+	if ( _resetTrigger.HasAsyncSet() ) {
 		for (int i = 0; i < kENCODER_Count; i++) {
 			_encoders[i]._countEdge = 0;
 		}
@@ -74,8 +74,6 @@ void EncoderManager::Run(void)
 	// Map low lever ISR value to registers
 	_encoders[kENCODER_1]._count.Set(_encoders[kENCODER_1]._countEdge);
 	_encoders[kENCODER_2]._count.Set(_encoders[kENCODER_2]._countEdge);
-	_encoders[kENCODER_1]._count.Updated();
-	_encoders[kENCODER_2]._count.Updated();
 }
 
 /*------------------------------------------------------------------
@@ -84,8 +82,8 @@ void EncoderManager::CalckRPM(int dt)
 {
 	for (int i = kENCODER_1; i <= kENCODER_2; i++) {
 		Encoder* pE = &_encoders[i];
-		int current = pE->_count.Read();
-		int rpm = ( current - pE->_lastCount) * 10 / pE->_ppr.Read();
+		int current = pE->_count.Get();
+		int rpm = ( current - pE->_lastCount) * 10 / pE->_ppr.Get();
 		pE->_rpm.Set(rpm);
 		pE->_lastCount = current;
 	}

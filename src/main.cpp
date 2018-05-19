@@ -8,36 +8,29 @@
 #include "Motor.h"
 
 
-Value gChargeStatus;
-Value gVersion;
+AValue gChargeStatus;
+AValue gVersion;
 
 
 int main(void)
 {
-
 	gRMap.Init();
 	HW_Init();
 
 	gSound.Init();
 	gEncoders.Init();
 	gMotor.Init();
-//	Servo_Init();
+	//Servo_Init();
 	BQ_Init();
 
-	GPIO_Write(SPK_EN, 1);		// Turn on op-amp for speaker
-	// BQ_5Venable(1);			// ToDo:  later this will be controlled
 	// BQ_WDenable(0);				// Disable
 
 	GPIO_Write(O5, 1);
 	GPIO_Write(O4, 1);
-	GPIO_Write(MOT2_R, 0);
-	GPIO_Write(MOT1_R, 0);
 	GPIO_Write(O4, 2);
 
 	gRMap.SetValueObj(kRM_SystemFMVers1, &gVersion);
 	gVersion.Set(0x01000002);
-
-
 
 	int bootNote = 3;
 	int bootNotes[] = {0, 261, 329, 195, -1};
