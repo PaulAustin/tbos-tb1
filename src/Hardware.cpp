@@ -1,4 +1,3 @@
-//#include "em_syetem.h"
 #include "em_cmu.h"
 #include "em_timer.h"
 #include "em_gpio.h"
@@ -632,10 +631,6 @@ int I2C0_WriteReg(uint8_t addr, uint8_t reg, uint8_t * pBuf, uint8_t len)
 	}
 	seq.buf[0].data = data;	// ptr to outgoing data
 	seq.buf[0].len = 1+len;	// len of outgoing data
-
-	 // Setup incoming destination (NONE)
-	//seq.buf[1].data =
-	//seq.buf[1].len =
 
 	// Do a polled transfer
 	m_I2C_Status = I2C_TransferInit(I2C0, &seq);

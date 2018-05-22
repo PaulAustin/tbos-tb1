@@ -1,12 +1,28 @@
-//============================================================================
-//  Title	: Utils.c
-//  Desc	: Misc utility functions
-//  2016-11-03	Daraius		Created
-//============================================================================
+/*
+Copyright (c) 2018 Trashbots, Inc. - SDG
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 #include <stdint.h>
 #include "em_timer.h"
-#include "em_int.h"		// we use INT_Disable/Enable
+#include "em_int.h"
 #include "em_gpio.h"
 
 #include "Hardware.h"
@@ -14,13 +30,7 @@
 #include "Motor.h"
 #include "Encoder.h"
 
-typedef struct
-{
-	uint32_t uptimer[MAX_TIMERS];  // 32 bit = 49 days at 1msec...
-} systime_t;
-
 Timer gTimer;
-systime_t m_Time;
 
 void Timer::hwTick()
 {
@@ -30,10 +40,6 @@ void Timer::hwTick()
 		ticks_hw = 0;
 		ticks_1ms++;
 		flg_1ms = 1;
-		// General Purpose CountUp Timers, increment at 1msec
-		for (int i=0; i < MAX_TIMERS; i++ ) {
-			m_Time.uptimer[i]++;    // countUp timers, overflow after 49 days
-		}
 
 		if ( ticks_1ms==10 ) {
 			// 10 ms
@@ -63,8 +69,6 @@ void Timer::hwTick()
 	}
 }
 
-
-
 //----------------------------------------------------------------------------
 // Name: Timer0 ISR handler
 // Desc: Main system Tick
@@ -72,58 +76,8 @@ void Timer::hwTick()
 //----------------------------------------------------------------------------
 extern "C" void TIMER0_IRQHandler(void)
 {
-
 	TIMER_IntClear(TIMER0, TIMER_IF_OF);      // Clear overflow flag
-
-	// PFA GPIO_SET(gpio_O4);
 	gEncoders.RunISR();
 	gMotor.RunISR();
-	// PFA GPIO_CLR(gpio_O4);
 	gTimer.hwTick();
-}
-
-/*----------------------------------------------------------------------------
-Name: Time_StartTimer
-Desc: Start a selected Timer
-Ins	: timernum	must be leass than MAX_TIMERS
-Outs:
-/ ---------------------------------------------------------------------------*/
-void Time_StartTimer( uint8_t timernum )
-{
-	if ( timernum < MAX_TIMERS ) {
-		m_Time.uptimer[timernum]=0;
-	}
-}
-
-/*----------------------------------------------------------------------------
-Name: Time_isTimeout
-Desc: Check for elapsed time.  Timer must have been started first with StartTimer
-Ins	: timernum		must be leass than MAX_TIMERS
-	  timeout_ms	period to compare against
-Outs: TRUE when timer has run past the specified timeout
-	  FALSE otherwise (or is an invalid timernum was specified
-/ ---------------------------------------------------------------------------*/
-bool Time_isTimeout( uint8_t timernum, uint32_t timeout_ms )
-{
-	if ( timernum < MAX_TIMERS ) {
-		if ( m_Time.uptimer[timernum] > timeout_ms ) {
-			return( true );
-		}
-	}
-	return( false );
-}
-
-/*----------------------------------------------------------------------------
-Name: Time_CheckTime
-Desc: Return the time elapsed since Time_StartTimer
-Ins	: timernum		must be leass than MAX_TIMERS
-Outs: time in msec
-/ ---------------------------------------------------------------------------*/
-uint32_t Time_CheckTime(uint8_t timernum)
-{
-	if (timernum < MAX_TIMERS) {
-		return( m_Time.uptimer[timernum]);
-	} else {
-		return 0;
-	}
 }

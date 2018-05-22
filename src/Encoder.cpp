@@ -65,10 +65,9 @@ Name: Encoder_Run
 void EncoderManager::Run(void)
 {
 	// See if encoder clear register was written to.
-	if ( _resetTrigger.HasAsyncSet() ) {
-		for (int i = 0; i < kENCODER_Count; i++) {
-			_encoders[i]._countEdge = 0;
-		}
+	for (int i = 0; i < kENCODER_Count; i++) {
+		if (_encoders[i]._reset.HasAsyncSet())
+		_encoders[i]._countEdge = 0;
 	}
 
 	// Map low lever ISR value to registers

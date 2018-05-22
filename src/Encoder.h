@@ -10,13 +10,6 @@
 
 #include "Value.h"
 
-
-void Encoder_Init(void);
-void Encoder_Run(void);
-void Encoder_RunISR(void);
-int32_t Encoder_ReadCount(int);
-
-
 enum
 {
 	kENCODER_1=0,
@@ -31,6 +24,7 @@ enum
 class Encoder {
 public:
 	// ValueRegisters
+	ATrigger _reset;
 	AValue 	_ppr;
 	AValue 	_count;
 	AValue 	_rpm;
@@ -43,7 +37,6 @@ public:
 class EncoderManager
 {
 public:
-	AValue _resetTrigger;
 	void 	Init();
 	void 	RunISR();
 	void 	CalckRPM(int);
