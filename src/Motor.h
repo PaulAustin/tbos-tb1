@@ -20,6 +20,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#ifndef MOTOR_H_
+#define MOTOR_H_
+
 #include "Value.h"
 
 class MotorManager {
@@ -35,7 +38,7 @@ public:
 	void RunISR();
 };
 
-extern MotorManager gMotor;
+extern MotorManager gMotors;
 
 enum {
 	kMOTOR_1=0,
@@ -49,4 +52,6 @@ bool Motors_Idle();
 void Motor_Run(void);
 void Motor_RunISR(void);
 void Motor_SetPower(int id, int power);
+
+#endif // MOTOR_H_
 

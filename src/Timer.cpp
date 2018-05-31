@@ -55,13 +55,13 @@ void Timer::hwTick()
 				flg_100ms = 1;
 			}
 			if ( ticks_100ms == 5 ) {
-				// halfsec
+				// half second
 				ticks_100ms = 0;
 				ticks_500ms++;
 				flg_500ms = 1;
 			}
 			if ( ticks_500ms == 2 ) {
-				// onesec
+				// one second
 				ticks_500ms = 0;
 				flg_1sec = 1;
 			}
@@ -78,6 +78,6 @@ extern "C" void TIMER0_IRQHandler(void)
 {
 	TIMER_IntClear(TIMER0, TIMER_IF_OF);      // Clear overflow flag
 	gEncoders.RunISR();
-	gMotor.RunISR();
+	gMotors.RunISR();
 	gTimer.hwTick();
 }

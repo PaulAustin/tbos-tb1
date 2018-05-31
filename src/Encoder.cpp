@@ -19,8 +19,9 @@ void EncoderManager::Init(void)
 	gRMap.SetValueObj(kRM_Motor2Rpm, &_encoders[kENCODER_2]._rpm);
 
 	for (int i = 0; i < kENCODER_Count; i++) {
-		_encoders[i]._ppr.Set(210);
+		_encoders[i]._ppr.Set(1400);
 		_encoders[i]._count.Set(0);
+		_encoders[i]._rpm.Set(0);
 	}
 }
 

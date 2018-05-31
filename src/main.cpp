@@ -27,7 +27,7 @@ SOFTWARE.
 #include "Encoder.h"
 #include "Sound.h"
 #include "Motor.h"
-
+#include "Servo.h"
 
 AValue gChargeStatus;
 AValue gVersion;
@@ -40,17 +40,15 @@ int main(void)
 
 	gSound.Init();
 	gEncoders.Init();
-	gMotor.Init();
-	//Servo_Init();
+	gMotors.Init();
+	gServos.Init();
 	BQ_Init();
 
+	// Is this an option to allow vi register?
 	// BQ_WDenable(0);				// Disable
 
-	GPIO_Write(O5, 1);
-	GPIO_Write(O4, 1);
-	GPIO_Write(O4, 2);
-
 	gRMap.SetValueObj(kRM_SystemFMVers1, &gVersion);
+	gRMap.SetValueObj(kRM_SystemStatus, &gVersion);
 	gVersion.Set(0x01000002);
 
 	int bootNote = 3;
@@ -65,14 +63,12 @@ int main(void)
 		// this might be a bit faster than needed. 100Hz would be a minimum.
 		if ( gTimer.is_1msec() ) {
 			gSound.Run();
-			gMotor.Run();
+			gMotors.Run();
 			gEncoders.Run();
+			gServos.Run();
 		}
 
 		if (gTimer.is_100msec()) {
-			//chargeStat = BQ_ChargeStatus();
-			chargeStat = GPIO_Read(CHG_STAT);
-			gChargeStatus.Set(chargeStat);
 
 			if (bootNote >= 0) {
 				int pitch = bootNotes[bootNote];
@@ -91,9 +87,13 @@ int main(void)
 			// The 5V enable will be dropped.
 			BQ_5VUsagePing();
 
-			if (gMotor.Idle()) {
+			if (gMotors.Idle()) {
 				BQ_5VCheckTimeout();
 			}
+
+			//chargeStat = BQ_ChargeStatus();
+			chargeStat = GPIO_Read(CHG_STAT);
+			gChargeStatus.Set(chargeStat);
 
 			i++;
 			if (i % 20 == 0 ) {

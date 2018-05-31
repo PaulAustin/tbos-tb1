@@ -55,7 +55,7 @@ typedef struct
 } motor_t;
 
 motor_t m_Motor[kMOTOR_Count];
-MotorManager gMotor;
+MotorManager gMotors;
 
 void MotorManager::Init(void)
 {
@@ -87,7 +87,7 @@ the motors.
 / ---------------------------------------------------------------------------*/
 bool MotorManager::Idle()
 {
-	return (gMotor._power1.Get() == 0 && gMotor._power2.Get() == 0);
+	return (gMotors._power1.Get() == 0 && gMotors._power2.Get() == 0);
 }
 
 /*----------------------------------------------------------------------------
@@ -110,8 +110,6 @@ void MotorManager::Run()
 		SetPower(kMOTOR_2, w2);
 	}
 }
-
-
 
 /*------------------------------------------------------------------
 Motor_SetPWM - Motor/Encoder State Machine

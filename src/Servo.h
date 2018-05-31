@@ -41,6 +41,7 @@ public:
 class ServoManager {
 public:
 	Servo	_servos[kSERVO_Count];
+	AValue	_gpio;
 public:
 	void Init();
 	void Run();
@@ -50,4 +51,4 @@ public:
 
 extern ServoManager gServos;
 
-#endif /* SERVO_H_ */
+#endif // SERVO_H_

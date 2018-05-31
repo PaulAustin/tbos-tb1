@@ -27,6 +27,7 @@ SOFTWARE.
 
 #define SERVO_MAXPERIOD_us			20000	// Maximum allowed period
 
+ServoManager gServos;
 
 /*----------------------------------------------------------------------------
 Name: Servo_Init
@@ -37,12 +38,13 @@ void ServoManager::Init(void)
 	gRMap.SetValueObj(kRM_Servo1Active, &_servos[kSERVO_1]._active);
 	gRMap.SetValueObj(kRM_Servo1Position, &_servos[kSERVO_1]._position);
 
-	gRMap.SetValueObj(kRM_Servo1Active, &_servos[kSERVO_2]._active);
-	gRMap.SetValueObj(kRM_Servo1Position, &_servos[kSERVO_2]._position);
+	gRMap.SetValueObj(kRM_Servo2Active, &_servos[kSERVO_2]._active);
+	gRMap.SetValueObj(kRM_Servo2Position, &_servos[kSERVO_2]._position);
 
-	gRMap.SetValueObj(kRM_Servo1Active, &_servos[kSERVO_3]._active);
-	gRMap.SetValueObj(kRM_Servo1Position, &_servos[kSERVO_3]._position);
+	gRMap.SetValueObj(kRM_Servo3Active, &_servos[kSERVO_3]._active);
+	gRMap.SetValueObj(kRM_Servo3Position, &_servos[kSERVO_3]._position);
 
+	gRMap.SetValueObj(kRM_Gpio, &_gpio);
 #if 0
 	uint16_t period_us;
 	// Set Servo Period, typical is about 20ms.
@@ -58,14 +60,29 @@ Desc: Servo State Machine
 / ---------------------------------------------------------------------------*/
 void ServoManager::Run(void)
 {
+#if 0
 	for (int ch=kSERVO_1; ch < kSERVO_Count; ch++) {
 
 		// The HW timer channel match the Servo enum. 0, 1, 2
+		_servos[ch]._position.Get();
 		HW_Timer2_SetPW_us(ch, 100);
-
 //		Servo_SetPW_us(ch, 10 /* _servos[ch].pw_us*/ );
 	}
+#endif
 
+	if (_gpio.HasAsyncSet()) {
+		// If the bit field has change update all Io
+		int bits = _gpio.Get();
+		GPIO_Write(O4, bits & 0x01 ? 1 : 0);
+		GPIO_Write(O5, bits & 0x02 ? 1 : 0);
+		GPIO_Write(IO6, bits & 0x04 ? 1 : 0);
+		GPIO_Write(IO7, bits & 0x08 ? 1 : 0);
+
+		// GPIO_Write(IO8, bits & 0x04 ? 1 : 0);
+		// GPIO_Write(IO9, bits & 0x08 ? 1 : 0);
+	}
+
+	//kRM_Gpio1
 
 #if 0
 	uint8_t ch;

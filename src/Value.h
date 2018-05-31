@@ -70,8 +70,8 @@ public:
 		_aValue = value;
 	}
 	virtual void Set(int value) {
-		_value = value;
 		_aValue = value;
+		_value = value;
 	}
 	virtual int  Get() {
 		return _value;
@@ -86,21 +86,14 @@ public:
 	}
 };
 
-
-
 class SlewValue : AValue {
 };
-
-
 class LinMapValue : AValue {
 };
-
 class OscValue : AValue {
 };
-
 class PIPValue : AValue {
 };
-
 
 // EVF8  Escaped value format 8 byte chunks.
 enum {

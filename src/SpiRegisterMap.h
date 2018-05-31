@@ -42,13 +42,15 @@ enum RegMap_t
 	kRM_MotorResetEncoder = 32,
 	kRM_MotorRpmSampleRate = 33, // typically about 10Hz
 
-	kRM_Servo1Position  = 40,
-	kRM_Servo1Active	= 41, // 0:off,   1:0-2ms, O:custom ???
-	kRM_Servo2Position  = 42,
-	kRM_Servo2Active 	= 43,
-	kRM_Servo3Position  = 44,
-	kRM_Servo3Active 	= 45,
+	kRM_Servo1Active	= 40, // 0:off,   1:0-2ms, O:custom ???
+	kRM_Servo2Active 	= 41,
+	kRM_Servo3Active 	= 42,
 	// Room for more ...
+	kRM_Servo1Position  = 50,
+	kRM_Servo2Position  = 51,
+	kRM_Servo3Position  = 52,
+	// Room for more ...
+
 
 	kRM_NoteTempo 		= 60,	// default
 	kRM_NoteLength 		= 61,
