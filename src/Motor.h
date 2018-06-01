@@ -46,12 +46,5 @@ enum {
 	kMOTOR_Count
 };
 
-
-void Motor_Init(void);
-bool Motors_Idle();
-void Motor_Run(void);
-void Motor_RunISR(void);
-void Motor_SetPower(int id, int power);
-
 #endif // MOTOR_H_
 
