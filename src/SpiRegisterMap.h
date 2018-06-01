@@ -4,8 +4,8 @@
  2017-05-21	DaraiusH
 / ===========================================================================*/
 
-#ifndef SPI0_H_
-#define SPI0_H_
+#ifndef SPIREGISTERMAP_H_
+#define SPIREGISTERMAP_H_
 
 #include "Value.h"
 
@@ -39,7 +39,6 @@ enum RegMap_t
 
 	// kRM_Encoder1 = 30,
 	// kRM_Encoder2 = 31,
-	kRM_MotorResetEncoder = 32,
 	kRM_MotorRpmSampleRate = 33, // typically about 10Hz
 
 	kRM_Servo1Active	= 40, // 0:off,   1:0-2ms, O:custom ???
@@ -84,4 +83,4 @@ extern RegisterMap gRMap;
 // provide a modes abstraction so a function him can be added, and a flat enum can
 // be converted to a object/property hierarchy can be used
 
-#endif // SPI0_H_
+#endif // SPIREGISTERMAP_H_

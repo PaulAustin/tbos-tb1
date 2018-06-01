@@ -20,6 +20,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#ifndef SOUND_H_
+#define SOUND_H_
+
 #include "Value.h"
 
 class SoundManager {
@@ -37,5 +40,6 @@ public:
 	void PluckFrequency(int f);
 };
 
-
 extern SoundManager gSound;
+
+#endif // SOUND_H_

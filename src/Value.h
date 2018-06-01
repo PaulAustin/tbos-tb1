@@ -180,6 +180,4 @@ public:
 	}
 };
 
-
-
 #endif // VALUE_H_

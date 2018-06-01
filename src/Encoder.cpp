@@ -1,8 +1,25 @@
-//============================================================================
-//  Title	: Motor.c
-//  Desc	: Motor/Encoder Functions
-//  2017-07-24	Paul		Created (based on servo.c)
-//============================================================================
+/*
+Copyright (c) 2018 Trashbots, Inc. - SDG
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 #include "Hardware.h"
 #include "SpiRegisterMap.h"
 #include "Encoder.h"
@@ -65,19 +82,21 @@ Name: Encoder_Run
 / ---------------------------------------------------------------------------*/
 void EncoderManager::Run(void)
 {
-	// See if encoder clear register was written to.
 	for (int i = 0; i < kENCODER_Count; i++) {
-		if (_encoders[i]._reset.HasAsyncSet())
-		_encoders[i]._countEdge = 0;
+		if (_encoders[i]._count.HasAsyncSet()) {
+			// If register was written to then update the low level value.
+			// this is typically used to reset the counter.
+			_encoders[kENCODER_1]._countEdge = _encoders[kENCODER_1]._count.Get();
+		} else {
+			// Other wise copy level counter to register.
+			_encoders[kENCODER_1]._count.Set(_encoders[kENCODER_1]._countEdge);
+		}
 	}
-
-	// Map low lever ISR value to registers
-	_encoders[kENCODER_1]._count.Set(_encoders[kENCODER_1]._countEdge);
-	_encoders[kENCODER_2]._count.Set(_encoders[kENCODER_2]._countEdge);
 }
 
 /*------------------------------------------------------------------
 / ----------------------------------------------------------------*/
+// TODO: not done/tested
 void EncoderManager::CalckRPM(int dt)
 {
 	for (int i = kENCODER_1; i <= kENCODER_2; i++) {
