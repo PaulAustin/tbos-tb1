@@ -32,12 +32,15 @@ SOFTWARE.
 AValue gChargeStatus;
 AValue gVersion;
 
-
 int main(void)
 {
+	// Set up SPI IO register map before setting up interrupts.
 	gRMap.Init();
+
+	// Chip IO and interrupt configurations.
 	HW_Init();
 
+	// start the IO sub system
 	gSound.Init();
 	gEncoders.Init();
 	gMotors.Init();
@@ -49,32 +52,32 @@ int main(void)
 
 	gRMap.SetValueObj(kRM_SystemFMVers1, &gVersion);
 	gRMap.SetValueObj(kRM_SystemStatus, &gVersion);
-	gVersion.Set(0x01000002);
+	gVersion.Set(0x01000003);
 
 	int bootNote = 3;
 	int bootNotes[] = {0, 261, 329, 195, -1};
 	int chargeStat = 0;
     int i= 0;
 
-	/* Infinite loop */
+	// Infinite loop
 	while (1)
 	{
-		// Move values from register bank at periodic steps.
-		// this might be a bit faster than needed. 100Hz would be a minimum.
-		if ( gTimer.is_1msec() ) {
+		// Move values from SPI register bank at periodic steps.
+		if ( gTimer.is_5msec() ) {
 			gSound.Run();
 			gMotors.Run();
 			gEncoders.Run();
 			gServos.Run();
 		}
 
-		if (gTimer.is_100msec()) {
-
+		if ( gTimer.is_100msec() ) {
+			// TODO this is still a bit of a hack.
+			// once tunes work again use that approach instead.
 			if (bootNote >= 0) {
 				int pitch = bootNotes[bootNote];
 				if (pitch > 0) {
 					HW_Timer1_SetFreq(pitch);
-					HW_Timer1_Enable(true);  // Start Playing
+					HW_Timer1_Enable(true);   // Start Playing
 				} else if (pitch == 0){
 					HW_Timer1_Enable(false);  // Stop Playing
 				}
@@ -83,6 +86,8 @@ int main(void)
 		}
 
 		if ( gTimer.is_500msec() ) {
+			GPIO_Write(O4, 2);
+
 			// Periodically see if motors have been idle for a while. If so
 			// The 5V enable will be dropped.
 			BQ_5VUsagePing();
@@ -99,7 +104,6 @@ int main(void)
 			if (i % 20 == 0 ) {
 				BQ_IinLim(kBQ_IinLimit_500mA);
 			}
-
 		}
 	}
 }

@@ -35,35 +35,27 @@ Timer gTimer;
 void Timer::hwTick()
 {
 	ticks_hw++;
-	if ( ticks_hw == (1000/TICK_PERIOD_us) ) {
-		// 1000usec = 1msec
+	if ( ticks_hw == (5000/TICK_PERIOD_us) ) {
+		// 5000usec = 5msec
 		ticks_hw = 0;
-		ticks_1ms++;
-		flg_1ms = 1;
+		ticks_5ms++;
+		flg_5ms = 1;
 
-		if ( ticks_1ms==10 ) {
-			// 10 ms
-			ticks_1ms=0;
-			ticks_10ms++;
-			flg_10ms = 1;
-
-			// All other ms based timers will be on 10ms boundaries
-			if ( ticks_10ms==10 ) {
-				// 100ms
-				ticks_10ms=0;
-				ticks_100ms++;
-				flg_100ms = 1;
-			}
+		if ( ticks_5ms == 20 ) {
+			// 100ms
+			flg_100ms = 1;
+			ticks_5ms=0;
+			ticks_100ms++;
 			if ( ticks_100ms == 5 ) {
 				// half second
+				flg_500ms = 1;
 				ticks_100ms = 0;
 				ticks_500ms++;
-				flg_500ms = 1;
 			}
 			if ( ticks_500ms == 2 ) {
 				// one second
-				ticks_500ms = 0;
 				flg_1sec = 1;
+				ticks_500ms = 0;
 			}
 		}
 	}
