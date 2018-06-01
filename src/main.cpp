@@ -86,7 +86,8 @@ int main(void)
 		}
 
 		if ( gTimer.is_500msec() ) {
-			GPIO_Write(O4, 2);
+			// helpful for testing
+			// GPIO_Write(O4, 2);
 
 			// Periodically see if motors have been idle for a while. If so
 			// The 5V enable will be dropped.
