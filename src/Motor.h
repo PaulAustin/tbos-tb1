@@ -25,26 +25,38 @@ SOFTWARE.
 
 #include "Value.h"
 
-class MotorManager {
-	AValue _power1;
-	AValue _power2;
-	AValue _break1;
-	AValue _break2;
-public:
-	void Init();
-	void Run();
-	bool Idle();
-	void SetPower(int motor, int power);
-	void RunISR();
-};
-
-extern MotorManager gMotors;
+typedef struct
+{
+	int32_t lastEncoderCount;
+	int32_t targetDeltaCount;
+	int32_t cumulativeError;
+	uint8_t pwmHighF;
+	uint8_t pwmHighR;
+} motor_t;
 
 enum {
 	kMOTOR_1=0,
 	kMOTOR_2=1,
 	kMOTOR_Count
 };
+
+class MotorManager {
+	AValue _power1;
+	AValue _power2;
+	AValue _break1;
+	AValue _break2;
+	motor_t _motor[kMOTOR_Count];
+
+public:
+	void Init();
+	void Run();
+	bool Idle();
+	void SetPower(int motor, int power);
+	void SetBreak(int motor, bool state);
+	void RunISR();
+};
+
+extern MotorManager gMotors;
 
 #endif // MOTOR_H_
 

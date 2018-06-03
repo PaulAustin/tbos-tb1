@@ -27,16 +27,6 @@ SOFTWARE.
 #include "Motor.h"
 #include "Encoder.h"
 
-//#include "SpiMem.h"
-//#include "SpiRegisterMap.h"
-
-#define mask_MOTOR2_Break 		(1<<7)
-#define mask_MOTOR1_Break 		(1<<6)
-#define mask_MOTOR2_Forward 	(1<<5)
-#define mask_MOTOR1_Forward 	(1<<4)
-#define mask_MOTOR2_Run 		(1<<1)
-#define mask_MOTOR1_Run 		(1<<0)
-
 // Motor / encoder speed control using SW DIO for h-bridge control
 // and SW DIO for encoder reading. Math indicates that sampling at 4kHz
 // should be OK.
@@ -44,17 +34,6 @@ SOFTWARE.
 uint8_t pwmWidth;
 uint8_t pwmTic;
 
-
-typedef struct
-{
-	int32_t lastEncoderCount;
-	int32_t targetDeltaCount;
-	int32_t cumulativeError;
-	uint8_t pwmHighF;
-	uint8_t pwmHighR;
-} motor_t;
-
-motor_t m_Motor[kMOTOR_Count];
 MotorManager gMotors;
 
 void MotorManager::Init(void)
@@ -69,9 +48,11 @@ void MotorManager::Init(void)
 	pwmWidth = 10;
 	pwmTic = 0;
 
+	// value registers for power
 	gRMap.SetValueObj(kRM_Motor1Power, &_power1);
 	gRMap.SetValueObj(kRM_Motor2Power, &_power2);
 
+	// trigger registers for break
 	gRMap.SetValueObj(kRM_Motor1Break, &_break1);
 	gRMap.SetValueObj(kRM_Motor2Break, &_break2);
 
@@ -98,16 +79,27 @@ Desc: Motor/Encoder State Machine
 / ---------------------------------------------------------------------------*/
 void MotorManager::Run()
 {
-	int w1,w2 = 0;
+	// TODO there is bit of a race condition here. If the break is applied
+	// and the motor power is set in the same run cycle, the current system
+	// can't tell which came last. Priority is place on the break. Applying
+	// the break for 5ms or less is fairly pointless as well.
 
+	if (_break1.HasAsyncSet()) {
+		_power1.Set(0);
+		SetBreak(kMOTOR_1, _break1.Get());
+	}
 	if (_power1.HasAsyncSet()) {
-		w1 = _power1.Get();
-		SetPower(kMOTOR_1, w1);
+		SetPower(kMOTOR_1, _power1.Get());
+		_break1.Set(0);
 	}
 
+	if (_break2.HasAsyncSet()) {
+		_power2.Set(0);
+		SetBreak(kMOTOR_2, _break2.Get());
+	}
 	if (_power2.HasAsyncSet()) {
-		w2 = _power2.Get();
-		SetPower(kMOTOR_2, w2);
+		SetPower(kMOTOR_2, _power2.Get());
+		_break2.Set(0);
 	}
 }
 
@@ -117,16 +109,16 @@ Motor_SetPWM - Motor/Encoder State Machine
 	  to generate pulse chain for power control.
 / ----------------------------------------------------------------*/
 void MotorManager::SetPower(int motorIndex, int power) {
+
 	int ticEdge = abs(power+5) / 10;
-
-	motor_t* pMotor = & m_Motor[motorIndex];
-
 	if (ticEdge > 10)
 		ticEdge = 10;
 
 	if (power != 0) {
 		BQ_5VUsagePing();
 	}
+
+	motor_t* pMotor = & _motor[motorIndex];
 
 	// pwmHigh is %0-%100 power level, need to map more carefully
 	// Set the 0 first to avoid the ISR seeing both set.
@@ -144,6 +136,21 @@ void MotorManager::SetPower(int motorIndex, int power) {
 }
 
 /*------------------------------------------------------------------
+Motor_SetPWM - Motor/Encoder State Machine
+	  Called at highest rate possible to poll encoder edges and
+	  to generate pulse chain for power control.
+/ ----------------------------------------------------------------*/
+void MotorManager::SetBreak(int motorIndex, bool state) {
+	motor_t* pMotor = & _motor[motorIndex];
+
+	// true is break, false is coast
+	int v = state ? 10 : 0;
+
+	pMotor->pwmHighR = v;
+	pMotor->pwmHighF = v;
+}
+
+/*------------------------------------------------------------------
 Name: Motor_RunISR
 Desc: Motor/Encoder State Machine
 	  Called at highest rate possible to poll encoder edges and
@@ -151,17 +158,29 @@ Desc: Motor/Encoder State Machine
 / ----------------------------------------------------------------*/
 void MotorManager::RunISR()
 {
+	// Set DIO signals for the MP607 motor driver
+	//
+	// 	IN1		IN2		Out1	OUt2
+	//	-------------------------
+	//	L	  	L		HiZ		HiZ
+	//	L	  	H		Gnd		Vin		Forward
+	//	H	  	L		Vin		Gnd		Reverse
+	//	H	  	H		Gnd		Gnd		Break
+	//
+	// 	Note: logic is reversed.
+	//	Writing true to register pulls line to low.
+
 	// Motors share the same primary PWM counter, the duty cycle
 	// is specific to each motor and direction. The PWM values
 	// are configured so the F or R will always be low, unless
 	// the motors are stopped with break mode.
+
 	pwmTic++;
 	if (pwmTic >= pwmWidth) {
 		pwmTic = 0;
 	}
-	GPIO_WRITE(gpio_MOT1_F, m_Motor[kMOTOR_1].pwmHighF > pwmTic);
-	GPIO_WRITE(gpio_MOT1_R, m_Motor[kMOTOR_1].pwmHighR > pwmTic);
-	GPIO_WRITE(gpio_MOT2_F, m_Motor[kMOTOR_2].pwmHighF > pwmTic);
-	GPIO_WRITE(gpio_MOT2_R, m_Motor[kMOTOR_2].pwmHighR > pwmTic);
-
+	GPIO_WRITE(gpio_MOT1_F, _motor[kMOTOR_1].pwmHighF > pwmTic);
+	GPIO_WRITE(gpio_MOT1_R, _motor[kMOTOR_1].pwmHighR > pwmTic);
+	GPIO_WRITE(gpio_MOT2_F, _motor[kMOTOR_2].pwmHighF > pwmTic);
+	GPIO_WRITE(gpio_MOT2_R, _motor[kMOTOR_2].pwmHighR > pwmTic);
 }
