@@ -37,8 +37,6 @@ enum RegMap_t
 	// P, I , D  ??
 
 
-	// kRM_Encoder1 = 30,
-	// kRM_Encoder2 = 31,
 	kRM_MotorRpmSampleRate = 33, // typically about 10Hz
 
 	kRM_Servo1Active	= 40, // 0:off,   1:0-2ms, O:custom ???
@@ -68,10 +66,10 @@ enum RegMap_t
 
 class RegisterMap {
 public:
-	AValue* _registers[kRM_Count];
+	ATrigger* _registers[kRM_Count];
 public:
 	void Init();  // global constructors cause problems since they are before main
-	void SetValueObj(int id, AValue* vobj) { _registers[id] = vobj; }
+	void SetValueObj(int id, ATrigger* vobj) { _registers[id] = vobj; }
 	void ASet(int id, int value)  { _registers[id]->ASet(value); }
 	int Get(int id)  { return _registers[id]->Get(); }
 	void WriteDotted(int id, int dotted, int value);

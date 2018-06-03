@@ -47,6 +47,9 @@ public:
 		// Ignore the value, just mark as set.
 		_aValue = true;
 	}
+	virtual int  Get() {
+		return false;
+	}
 	virtual bool HasAsyncSet() {
 		bool n = _aValue;
 		_aValue = false;
@@ -57,7 +60,7 @@ public:
 	}
 };
 
-class AValue : ATrigger {
+class AValue : public ATrigger {
 protected:
 	int _value;
 public:
