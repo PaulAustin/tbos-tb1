@@ -49,12 +49,12 @@ void MotorManager::Init(void)
 	pwmTic = 0;
 
 	// value registers for power
-	gRMap.SetValueObj(kRM_Motor1Power, &_power1);
-	gRMap.SetValueObj(kRM_Motor2Power, &_power2);
+	gRMap.SetValueObj(kRM_Motor1Power, &_m1._power);
+	gRMap.SetValueObj(kRM_Motor2Power, &_m2._power);
 
 	// trigger registers for break
-	gRMap.SetValueObj(kRM_Motor1Break, &_break1);
-	gRMap.SetValueObj(kRM_Motor2Break, &_break2);
+	gRMap.SetValueObj(kRM_Motor1Break, &_m1._break);
+	gRMap.SetValueObj(kRM_Motor2Break, &_m2._break);
 
 }
 
@@ -68,38 +68,34 @@ the motors.
 / ---------------------------------------------------------------------------*/
 bool MotorManager::Idle()
 {
-	return (gMotors._power1.Get() == 0 && gMotors._power2.Get() == 0);
+	return (_m1._power.Get() == 0 && _m2._power.Get() == 0);
 }
 
 /*----------------------------------------------------------------------------
-Name: Motor_Run
+Name: Motor::Run
 Desc: Motor/Encoder State Machine
 	  Called every 1msec for control operations
 	  Operates the motors, read the encoders
 / ---------------------------------------------------------------------------*/
 void MotorManager::Run()
 {
+	_m1.CheckRegs();
+	_m2.CheckRegs();
+}
+
+void Motor::CheckRegs() {
 	// TODO there is bit of a race condition here. If the break is applied
 	// and the motor power is set in the same run cycle, the current system
 	// can't tell which came last. Priority is place on the break. Applying
 	// the break for 5ms or less is fairly pointless as well.
 
-	if (_break1.HasAsyncSet()) {
-		_power1.Set(0);
-		SetBreak(kMOTOR_1, _break1.Get());
+	if (_break.HasAsyncSet()) {
+		_power.Set(0);
+		SetBreak(_break.Get());
 	}
-	if (_power1.HasAsyncSet()) {
-		SetPower(kMOTOR_1, _power1.Get());
-		_break1.Set(0);
-	}
-
-	if (_break2.HasAsyncSet()) {
-		_power2.Set(0);
-		SetBreak(kMOTOR_2, _break2.Get());
-	}
-	if (_power2.HasAsyncSet()) {
-		SetPower(kMOTOR_2, _power2.Get());
-		_break2.Set(0);
+	if (_power.HasAsyncSet()) {
+		SetPower(_power.Get());
+		_break.Set(0);
 	}
 }
 
@@ -108,7 +104,7 @@ Motor_SetPWM - Motor/Encoder State Machine
 	  Called at highest rate possible to poll encoder edges and
 	  to generate pulse chain for power control.
 / ----------------------------------------------------------------*/
-void MotorManager::SetPower(int motorIndex, int power) {
+void Motor::SetPower(int power) {
 
 	int ticEdge = abs(power+5) / 10;
 	if (ticEdge > 10)
@@ -118,20 +114,18 @@ void MotorManager::SetPower(int motorIndex, int power) {
 		BQ_5VUsagePing();
 	}
 
-	motor_t* pMotor = & _motor[motorIndex];
-
 	// pwmHigh is %0-%100 power level, need to map more carefully
 	// Set the 0 first to avoid the ISR seeing both set.
 	if (power > 0) {
-		pMotor->pwmHighR = 0;
-		pMotor->pwmHighF = ticEdge;
+		_pwmHighR = 0;
+		_pwmHighF = ticEdge;
 	} else if ( power < 0 ){
-		pMotor->pwmHighF = 0;
-		pMotor->pwmHighR = ticEdge;
+		_pwmHighF = 0;
+		_pwmHighR = ticEdge;
 	} else {
 		// coast
-		pMotor->pwmHighR = 0;
-		pMotor->pwmHighF = 0;
+		_pwmHighR = 0;
+		_pwmHighF = 0;
 	}
 }
 
@@ -140,14 +134,13 @@ Motor_SetPWM - Motor/Encoder State Machine
 	  Called at highest rate possible to poll encoder edges and
 	  to generate pulse chain for power control.
 / ----------------------------------------------------------------*/
-void MotorManager::SetBreak(int motorIndex, bool state) {
-	motor_t* pMotor = & _motor[motorIndex];
+void Motor::SetBreak(bool state) {
 
 	// true is break, false is coast
 	int v = state ? 10 : 0;
 
-	pMotor->pwmHighR = v;
-	pMotor->pwmHighF = v;
+	_pwmHighR = v;
+	_pwmHighF = v;
 }
 
 /*------------------------------------------------------------------
@@ -179,8 +172,8 @@ void MotorManager::RunISR()
 	if (pwmTic >= pwmWidth) {
 		pwmTic = 0;
 	}
-	GPIO_WRITE(gpio_MOT1_F, _motor[kMOTOR_1].pwmHighF > pwmTic);
-	GPIO_WRITE(gpio_MOT1_R, _motor[kMOTOR_1].pwmHighR > pwmTic);
-	GPIO_WRITE(gpio_MOT2_F, _motor[kMOTOR_2].pwmHighF > pwmTic);
-	GPIO_WRITE(gpio_MOT2_R, _motor[kMOTOR_2].pwmHighR > pwmTic);
+	GPIO_WRITE(gpio_MOT1_F, _m1._pwmHighF > pwmTic);
+	GPIO_WRITE(gpio_MOT1_R, _m1._pwmHighR > pwmTic);
+	GPIO_WRITE(gpio_MOT2_F, _m2._pwmHighF > pwmTic);
+	GPIO_WRITE(gpio_MOT2_R, _m2._pwmHighR > pwmTic);
 }
