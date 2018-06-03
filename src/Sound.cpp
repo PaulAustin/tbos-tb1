@@ -54,7 +54,7 @@ void SoundManager::Init(void)
 	noteTempo.Set(60);
 	noteTempo.Reset();
 	// Length of note in 16th notes
-	noteLength.Set(125);
+	noteLength.Set(25);
 	noteLength.Reset();
 
 	// Turn on op-amp for speaker
