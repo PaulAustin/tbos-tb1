@@ -32,9 +32,11 @@ typedef struct
 	uint8_t regval;
 } BQregs_t;
 
+//2 different bytes for the values (NN)
 BQregs_t m_BQreg[regBQMAX] =
 {	// Power up defaults
 	// regAddr, regVal(reset)
+	// 8 Register Indexes (NN)
 	{0x00, 0x30},
 	{0x01, 0x1B},
 	{0x02, 0x60},
@@ -54,7 +56,7 @@ BQregs_t m_BQreg[regBQMAX] =
 
 // Register Defaults
 
-
+//Need 2 8-bit memory addresses to send and recieve addresses
 static uint8_t m_Buf[2];  // All registers are 8 bit
 
 int BQReadRegister(int reg)
