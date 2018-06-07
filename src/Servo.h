@@ -40,7 +40,11 @@ public:
 
 class ServoManager {
 public:
-	Servo	_servos[kSERVO_Count];
+	Servo	_s1;
+	Servo	_s2;
+	Servo	_s3;
+
+	//Servo	_servos[kSERVO_Count];
 	AValue	_gpio;
 public:
 	void Init();

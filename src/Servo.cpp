@@ -35,14 +35,14 @@ Desc:
 / ---------------------------------------------------------------------------*/
 void ServoManager::Init(void)
 {
-	gRMap.SetValueObj(kRM_Servo1Active, &_servos[kSERVO_1]._active);
-	gRMap.SetValueObj(kRM_Servo1Position, &_servos[kSERVO_1]._position);
+	gRMap.SetValueObj(kRM_Servo1Active, &_s1._active);
+	gRMap.SetValueObj(kRM_Servo1Position, &_s1._position);
 
-	gRMap.SetValueObj(kRM_Servo2Active, &_servos[kSERVO_2]._active);
-	gRMap.SetValueObj(kRM_Servo2Position, &_servos[kSERVO_2]._position);
+	gRMap.SetValueObj(kRM_Servo2Active, &_s2._active);
+	gRMap.SetValueObj(kRM_Servo2Position, &_s2._position);
 
-	gRMap.SetValueObj(kRM_Servo3Active, &_servos[kSERVO_3]._active);
-	gRMap.SetValueObj(kRM_Servo3Position, &_servos[kSERVO_3]._position);
+	gRMap.SetValueObj(kRM_Servo3Active, &_s3._active);
+	gRMap.SetValueObj(kRM_Servo3Position, &_s3._position);
 
 	gRMap.SetValueObj(kRM_Gpio, &_gpio);
 #if 0
