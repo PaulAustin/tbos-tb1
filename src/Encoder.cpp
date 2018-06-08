@@ -28,8 +28,6 @@ EncoderManager gEncoders;
 
 //------------------------------------------------------------------
 void Encoder::Init() {
-	gRMap.SetValueObj(kRM_Motor1Encoder, &_count);
-	gRMap.SetValueObj(kRM_Motor1Rpm, &_rpm);
 	_ppr.Set(1400);
 	_count.Set(0);
 	_rpm.Set(0);
@@ -58,6 +56,15 @@ void Encoder::CalcRPM() {
 
 //------------------------------------------------------------------
 void EncoderManager::Init(void) {
+
+	gRMap.SetValueObj(kRM_Motor1Encoder, &_e1._count);
+	gRMap.SetValueObj(kRM_Motor1Rpm, &_e1._rpm);
+	gRMap.SetValueObj(kRM_Motor1Ppr, &_e1._ppr);
+
+	gRMap.SetValueObj(kRM_Motor2Encoder, &_e2._count);
+	gRMap.SetValueObj(kRM_Motor2Rpm, &_e2._rpm);
+	gRMap.SetValueObj(kRM_Motor2Ppr, &_e2._ppr);
+
 	_e1.Init();
 	_e2.Init();
 }
