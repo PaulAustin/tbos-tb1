@@ -188,6 +188,10 @@ public:
 		}
 		else if (_bytesRemaining > 0)
 		{
+			//Can only handle 16 bits
+			//Need to update for 32 bits
+			//Still trying to decide
+			
 			ev8 = (ev8 & 0x00ff);
 			switch(_bytesRemaining)
 			{
