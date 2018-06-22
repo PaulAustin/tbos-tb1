@@ -54,6 +54,7 @@ int main(void)
 	gRMap.SetValueObj(kRM_SystemStatus, &gVersion);
 	gVersion.Set(0x01000003);
 
+	// A short boot up set of notes.
 	int bootNote = 3;
 	int bootNotes[] = {0, 261, 329, 195, -1};
 	int chargeStat = 0;
@@ -97,7 +98,7 @@ int main(void)
 				BQ_5VCheckTimeout();
 			}
 
-			//chargeStat = BQ_ChargeStatus();
+			// chargeStat = BQ_ChargeStatus();
 			chargeStat = GPIO_Read(CHG_STAT);
 			gChargeStatus.Set(chargeStat);
 

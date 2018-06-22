@@ -23,7 +23,7 @@ enum RegMap_t
 	kRM_Motor1Power 	= 10,
 	kRM_Motor1Rpm 		= 11,
 	kRM_Motor1Break 	= 12,
-	kRM_Motor1Cpr 		= 13,
+	kRM_Motor1Ppr 		= 13,
 	kRM_Motor1Countdown = 14,
 	kRM_Motor1Encoder   = 15,
 	// P, I , D  ??
@@ -31,7 +31,7 @@ enum RegMap_t
 	kRM_Motor2Power 	= 20,
 	kRM_Motor2Rpm 		= 21,
 	kRM_Motor2Break 	= 22,
-	kRM_Motor2Cpr 		= 23,
+	kRM_Motor2Ppr 		= 23,
 	kRM_Motor2Countdowm = 24,
 	kRM_Motor2Encoder	= 25,
 	// P, I , D  ??

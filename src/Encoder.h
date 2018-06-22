@@ -25,13 +25,6 @@ SOFTWARE.
 
 #include "Value.h"
 
-enum
-{
-	kENCODER_1=0,
-	kENCODER_2=1,
-	kENCODER_Count
-};
-
 class Encoder {
 public:
 	// ValueRegisters
@@ -42,17 +35,22 @@ public:
 	// Used by ISR
 	int 	_countEdge;  // count on A edge
 	bool 	_lastEdgeA;
+public:
+	void Init();
+	void Run();
+	void CalcRPM();
 };
 
 class EncoderManager
 {
 public:
+	Encoder _e1;
+	Encoder _e2;
+public:
 	void 	Init();
 	void 	RunISR();
-	void 	CalckRPM(int);
+	void 	CalckRPM();
 	void 	Run();
-	Encoder	_encoders[2];
-
 };
 
 extern EncoderManager gEncoders;
