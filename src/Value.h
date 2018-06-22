@@ -191,6 +191,7 @@ public:
 			//Can only handle 16 bits
 			//Need to update for 32 bits
 			//Still trying to decide
+			//the best appraoch
 			
 			ev8 = (ev8 & 0x00ff);
 			switch(_bytesRemaining)
