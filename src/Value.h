@@ -133,15 +133,19 @@ enum {
 	EVT8_Int64,				// four bytes following
 	EVT8_Float64,			// four bytes following
 
+
 	// Null-byte terminated String
 	EVT8_UTF8  = 121,		// null terminated UTF8 string
 	// Counted Array ( all should be alike )
 	EVT8_EltList  = 122,	// counted list of elements
 	EVT8_NVPList  = 123,	// counted list of name value pairs
+
+	EVT8_GetReg   = 124,	//Number to get the register
 };
 
 /* Read and build ale a byte at a time. */
-class ValueReader {
+class ValueReaderWriter
+{
 private:
 public:
 	int _v;
@@ -153,33 +157,102 @@ public:
 	// the sate proc can be
 	// in FPG it could be parallel logic all looking for finish clause.
 public:
-	ValueReader() {
+	ValueReaderWriter() {
 		Reset();
 	}
+
 	bool ReadV8(int ev8) {
-		if (_bytesRemaining == 0) {
-			if (ev8 >= EVT8_IntMiniMin && ev8 <= EVT8_MultiByteBase) {
+		if (_bytesRemaining == 0)
+		{
+			if (ev8 >= EVT8_IntMiniMin && ev8 <= EVT8_MultiByteBase)
+			{
 				_v = ev8;
-				return true;
-			} else if (ev8 == EVT8_Int16) {
-				_v = 0;
-				_bytesRemaining = 2;
 				return false;
-			} else if (ev8 == EVT8_Int32) {
-				_v = ev8;
-			} else if (ev8 == EVT8_UTF8) {
+			}
+			else if (ev8 == EVT8_Int16)
+			{
+					_v = 0;
+					_bytesRemaining = 2;
+					return true;
+			}
+			else if (ev8 == EVT8_Int32)
+			{
+					_v = 0;
+					_bytesRemaining = 4;
+					return true;
+			}
+			else if (ev8 == EVT8_UTF8)
+			{
 				_v = ev8;
 			}
-		} else if (_bytesRemaining > 0) {
-			_v = (_v << 8) | (ev8 & 0x00ff);
-			_bytesRemaining--;
-			return (_bytesRemaining == 0);
 		}
-		return false;
+		else if (_bytesRemaining > 0)
+		{
+			ev8 = (ev8 & 0x00ff);
+			switch(_bytesRemaining)
+			{
+				case 1:
+					_v = _v | (ev8 << 8);
+					break;
+				case 2:
+					_v = _v | ev8;
+					break;
+				/*
+				case 3:
+					_v = _v | (ev8 << 16);
+					break;
+				case 4:
+					_v = _v | (ev8 << 24);
+					break;
+				*/
+			}
+			_bytesRemaining--;
+			return (_bytesRemaining != 0);
+		}
+		return true;
 	}
-	int Value() { return _v; }
-	void Reset() {
-		_v = _bytesRemaining = 0;
+
+	// -- Return 1 byte at a time as requested --
+	// After a reset, if 1st byte is
+	//  0  			- only 1ow byte read
+	//  EVT8_xxx	- indicates how many bytes to remain
+	bool WriteV8(int ev8)
+	{
+		if (_bytesRemaining == 0)
+		{
+			switch(ev8)
+			{
+			case 0:
+				return(false);
+				break;
+			case EVT8_Int16:
+				_bytesRemaining = (3-1);
+				return(true);
+				break;
+			case EVT8_Int32:
+				_bytesRemaining = (5-1);
+				return(true);
+				break;
+			}
+		}
+		else {
+			_bytesRemaining--;
+			if (_bytesRemaining)
+				return(true);
+			else
+				return(false);
+		}
+	}
+
+	int Value()
+	{
+		return _v;
+	}
+
+	void Reset()
+	{
+		_v = 0;
+		_bytesRemaining = 0;
 	}
 };
 

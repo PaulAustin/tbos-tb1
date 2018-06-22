@@ -23,8 +23,10 @@ SOFTWARE.
 #include "em_usart.h"
 #include "Hardware.h"
 #include "SpiRegisterMap.h"
+#include "Timer.h"
 
-#define SPICHAR_TIMEOUT_ms	90
+#define TIMER_SPICHAR 		0
+#define SPICHAR_TIMEOUT_ms 	30
 #define SPICHAR_ACK			0xAC
 
 RegisterMap gRMap;
@@ -48,63 +50,83 @@ enum {
 	psGetReg = 2
 };
 
-static ValueReader gV8Reader;
+static ValueReaderWriter gV8RW;
 static int gReg = 0;
 static int gParam = 0;
 static int gPacketState = psCommand;
-static int gIntOut = 0;
+static unsigned int gIntOut = 0;
+static int resets = 0;
+
 //static char  outHack[] = {0x00, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26};
 
 extern "C" void USART0_RX_IRQHandler(void)
 {
-	int	inByte;
 
+	int	inByte;
+	GPIO_Write(IO6, 1);
 	if (!(USART0->STATUS & USART_STATUS_RXDATAV)) {
 		// this is not a "RX Data Valid" interrupt
 		return;
 	}
 
-	// Get the incoming Char
-	inByte = (int8_t)(USART0->RXDATA & 0xFF);
+	//Checks if the timer has gone over 90 ms
+	if(Time_isTimeOut(TIMER_SPICHAR,SPICHAR_TIMEOUT_ms))
+	{
+		resets++;
+		gPacketState = psCommand;
+	}
+	//Restart the timer
+	Time_StartTimer(TIMER_SPICHAR);
 
-	if (gV8Reader.ReadV8(inByte)) {
-		switch(gPacketState) {
-		case psCommand:
-			gReg = gV8Reader._v;
-			if (gReg > 0 && gReg < kRM_Count) {
-				gPacketState = psSetReg;
-			} else if (gReg < 0 && gReg > -kRM_Count) {
-				gPacketState = psGetReg;
-				gIntOut = gRMap._registers[-gReg]->Get();
-			} else {
-				gReg = 0;
-				// stay in command state
-			}
-			break;
-		case psSetReg:
+	inByte = (int8_t)(USART0->RXDATA & 0xFF);	// Get the incoming
+
+	switch(gPacketState)
+	{
+	case psCommand:
+		gReg = (int)inByte;
+		if (gReg > 0 && gReg < kRM_Count) {
+			gPacketState = psSetReg;
+		}
+		else if (gReg < 0 && gReg > -kRM_Count) {
+			gPacketState = psGetReg;
+			gIntOut = gRMap._registers[-gReg]->Get();
+			//gIntOut = 0x44332211;
+			gV8RW.Reset();
+		}
+		else {
+			gReg = 0;
+			// stay in command state
+		}
+		break;
+
+	case psSetReg:
+		if (gV8RW.ReadV8(inByte)==false) {
 			// Once the value has been fully read
 			// write it into the map.
-			gParam = gV8Reader.Value();
+			gParam = gV8RW.Value();
 			gRMap.ASet(gReg, gParam);
 			gReg = gParam = 0;
 			gPacketState = psCommand;
-			break;
-		case psGetReg:
-			// Incoming bytes are all single byte values
-			// counting down to 0
-			if (inByte == 0) {
-				// Must have clocked out the last byte.
-				// reset the state and load a zero for the next
-				// output
-				gPacketState = psCommand;
-			} else {
-				// line up a new byte to send.
-				gIntOut = gIntOut >> 8;
-			}
-			break;
+			gIntOut = SPICHAR_ACK;
 		}
+		else {
+			//Do Nothing
+		}
+		break;
+
+	case psGetReg:
+		if (gV8RW.WriteV8(inByte)==false) {
+			gPacketState = psCommand;
+			gIntOut = SPICHAR_ACK;
+		}
+		else  {
+			gIntOut = gIntOut >> 8;
+		}
+		break;
 	}
+
 
 	USART0->TXDATA = (int8_t) (gIntOut & 0xff);
 	USART_IntClear (USART0, USART_IF_RXDATAV);
+	GPIO_Write(IO6, 0);
 }
