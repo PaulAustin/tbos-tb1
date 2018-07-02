@@ -26,7 +26,7 @@ SOFTWARE.
 #include "Timer.h"
 
 #define TIMER_SPICHAR 		0
-#define SPICHAR_TIMEOUT_ms 	30
+#define SPICHAR_TIMEOUT_ms 	50
 #define SPICHAR_ACK			0xAC
 
 RegisterMap gRMap;
@@ -55,7 +55,7 @@ static int gReg = 0;
 static int gParam = 0;
 static int gPacketState = psCommand;
 static unsigned int gIntOut = 0;
-static int resets = 0;
+static bool s_enumflag=0;
 
 //static char  outHack[] = {0x00, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26};
 
@@ -63,17 +63,18 @@ extern "C" void USART0_RX_IRQHandler(void)
 {
 
 	int	inByte;
-	GPIO_Write(IO6, 1);
+	//GPIO_Write(IO7, 1);
 	if (!(USART0->STATUS & USART_STATUS_RXDATAV)) {
 		// this is not a "RX Data Valid" interrupt
 		return;
 	}
 
-	//Checks if the timer has gone over 90 ms
+	//Checks if the timer has gone over 50 ms
 	if(Time_isTimeOut(TIMER_SPICHAR,SPICHAR_TIMEOUT_ms))
 	{
-		resets++;
+	//GPIO_Write(IO6,1);
 		gPacketState = psCommand;
+	//GPIO_Write(IO6, 0);
 	}
 	//Restart the timer
 	Time_StartTimer(TIMER_SPICHAR);
@@ -89,9 +90,10 @@ extern "C" void USART0_RX_IRQHandler(void)
 		}
 		else if (gReg < 0 && gReg > -kRM_Count) {
 			gPacketState = psGetReg;
-			gIntOut = gRMap._registers[-gReg]->Get();
+			gIntOut = 0;
 			//gIntOut = 0x44332211;
-			gV8RW.Reset();
+			s_enumflag = 1;
+			//gV8RW.Reset();
 		}
 		else {
 			gReg = 0;
@@ -115,18 +117,50 @@ extern "C" void USART0_RX_IRQHandler(void)
 		break;
 
 	case psGetReg:
-		if (gV8RW.WriteV8(inByte)==false) {
-			gPacketState = psCommand;
-			gIntOut = SPICHAR_ACK;
+		if (s_enumflag){
+			// Get the low byte ready to go no matter what the enum is
+			gIntOut = gRMap._registers[-gReg]->Get();
+			// this byte is an enum
+			switch(inByte)
+			{
+			case 0:
+				gV8RW._bytesRemaining = 1;
+				break;
+			case EVT8_Int16:
+				gV8RW._bytesRemaining = 2;
+				break;
+			case EVT8_Int32:
+				gV8RW._bytesRemaining = 4;
+				break;
+			default:
+				gIntOut = SPICHAR_ACK;
+				gPacketState = psCommand;
+				break;
+			}
+			s_enumflag=0;
 		}
-		else  {
-			gIntOut = gIntOut >> 8;
+		else {
+			gV8RW._bytesRemaining--;
+			if (gV8RW._bytesRemaining)
+				gIntOut = gIntOut >> 8;
+			else {
+				gIntOut = SPICHAR_ACK;
+				gPacketState = psCommand;
+			}
 		}
+
+		//if (gV8RW.WriteV8(inByte)==false) {
+		//	gPacketState = psCommand;
+		//	gIntOut = SPICHAR_ACK;
+		//}
+		//else  {
+		//	gIntOut = gIntOut >> 8;
+		//}
 		break;
 	}
 
 
 	USART0->TXDATA = (int8_t) (gIntOut & 0xff);
 	USART_IntClear (USART0, USART_IF_RXDATAV);
-	GPIO_Write(IO6, 0);
+	//GPIO_Write(IO7, 0);
 }

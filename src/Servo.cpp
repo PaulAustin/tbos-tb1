@@ -18,6 +18,12 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+
+
+
+TODO:
+ - Figure out how to set the PWM for the servo
 */
 
 #include "Hardware.h"
@@ -35,20 +41,30 @@ Desc:
 / ---------------------------------------------------------------------------*/
 void ServoManager::Init(void)
 {
-	gRMap.SetValueObj(kRM_Servo1Active, &_s1._active);
-	gRMap.SetValueObj(kRM_Servo1Position, &_s1._position);
+	SetPeriod();
 
-	gRMap.SetValueObj(kRM_Servo2Active, &_s2._active);
-	gRMap.SetValueObj(kRM_Servo2Position, &_s2._position);
+	gRMap.SetValueObj(kRM_Servo1Active, &_servos[kSERVO_1]._active);
+	gRMap.SetValueObj(kRM_Servo1Position, &_servos[kSERVO_1]._position);
+	//gRMap.SetValueObj(kRM_Servo1MinRange, &_servos[kSERVO_1]._minPosition);
+	//gRMap.SetValueObj(kRM_Servo1MaxRange, &_servos[kSERVO_1]._maxPosition);
 
-	gRMap.SetValueObj(kRM_Servo3Active, &_s3._active);
-	gRMap.SetValueObj(kRM_Servo3Position, &_s3._position);
 
-	gRMap.SetValueObj(kRM_Gpio, &_gpio);
+	gRMap.SetValueObj(kRM_Servo2Active, &_servos[kSERVO_2]._active);
+	gRMap.SetValueObj(kRM_Servo2Position, &_servos[kSERVO_2]._position);
+	//gRMap.SetValueObj(kRM_Servo2MinRange, &_servos[kSERVO_2]._minPosition);
+	//gRMap.SetValueObj(kRM_Servo2MaxRange, &_servos[kSERVO_2]._maxPosition);
+
+	gRMap.SetValueObj(kRM_Servo3Active, &_servos[kSERVO_3]._active);
+	gRMap.SetValueObj(kRM_Servo3Position, &_servos[kSERVO_3]._position);
+	//gRMap.SetValueObj(kRM_Servo3MinRange, &_servos[kSERVO_3]._minPosition);
+	//gRMap.SetValueObj(kRM_Servo3MaxRange, &_servos[kSERVO_3]._maxPosition);
+
+	//gRMap.SetValueObj(kRM_Gpio, &_gpio);
 #if 0
 	uint16_t period_us;
 	// Set Servo Period, typical is about 20ms.
 	period_us = SERVO_MAXPERIOD_us;
+
 #endif
 }
 
@@ -60,16 +76,17 @@ Desc: Servo State Machine
 / ---------------------------------------------------------------------------*/
 void ServoManager::Run(void)
 {
-#if 0
-	for (int ch=kSERVO_1; ch < kSERVO_Count; ch++) {
+
+	for (int ch=kSERVO_1; ch < kSERVO_Count; ch++)
+	{
 
 		// The HW timer channel match the Servo enum. 0, 1, 2
-		_servos[ch]._position.Get();
-		HW_Timer2_SetPW_us(ch, 100);
+		if(_servos[ch]._position.HasAsyncSet()){
+			HW_Timer2_SetPW_us(ch, _servos[ch]._position.Get());
+		}
 //		Servo_SetPW_us(ch, 10 /* _servos[ch].pw_us*/ );
 	}
-#endif
-
+/*
 	if (_gpio.HasAsyncSet()) {
 		// If the bit field has change update all Io
 		int bits = _gpio.Get();
@@ -81,6 +98,8 @@ void ServoManager::Run(void)
 		// GPIO_Write(IO8, bits & 0x04 ? 1 : 0);
 		// GPIO_Write(IO9, bits & 0x08 ? 1 : 0);
 	}
+*/
+
 
 	//kRM_Gpio1
 
@@ -116,7 +135,7 @@ void ServoManager::Run(void)
 
 /*----------------------------------------------------------------------------
 Name: Servo_Stop
-Desc: Stop playing
+Desc: Stop playing (Bad Description)
 Ins	: ch	SERVO1/2/3
 / ---------------------------------------------------------------------------*/
 void ServoManager::Stop(int ch)
@@ -126,25 +145,104 @@ void ServoManager::Stop(int ch)
 
 /*----------------------------------------------------------------------------
 Name: Servo_SetPeriod
-Desc: Set the PWM period for all 3 Servos. Some servos can take
-a faster update rate than
+Desc: Set the common PWM period for all 3 Servos
 / ---------------------------------------------------------------------------*/
 void ServoManager::SetPeriod()
 {
-#if 0
-	uint16_t period;
-	period = SPI_REG_READ();
+	// Currently hardcoded to 10msec
+	HW_Timer2_SetPeriod_us(10000);
 
-
-	per = SpiMem_Read(SERVO_Period, 0) << 8;
-	per+= SpiMem_Read(SERVO_Period, 1);
-
-	if (per > SERVO_MAXPERIOD_us) {
-		per = SERVO_MAXPERIOD_us;
-	}
-	HW_Timer2_SetPeriod_us(per);
-
-#endif
+	//TODO: Replace above with a Read from a register
 }
+
+
+
+
+/*----------------------------------------------------------------------------
+Name: SetMinRange
+Desc: Sets the min range that a servo can go
+Ins	: min   Minimum range that a servo will go
+/ ---------------------------------------------------------------------------*/
+/*
+void Servo::SetMinRange(int min)
+{
+	if(min > 0 && min < _maxPosition.Get())
+	{
+	_minPosition.Set(min);
+	}
+}
+*/
+
+/*----------------------------------------------------------------------------
+Name: SetMaxRange
+Desc: Sets the max range that a servo can go
+Ins	: max   Maximum range that a servo will go
+/ ---------------------------------------------------------------------------*/
+/*
+void Servo::SetMaxRange(int max)
+{
+	if(max > _minPosition.Get())
+	{
+	_maxPosition.Set(max);
+	}
+}
+*/
+/*----------------------------------------------------------------------------
+Name: SetPosition
+Desc: Sets the position of the servo in PWM Units
+	  and they must be between min ad max positions
+Ins	: ch   SERVO1/2/3
+	  pos  Position of the servo
+/ ---------------------------------------------------------------------------*/
+/*
+void ServoManager::SetPosition(int ch, int pos)
+{
+	//rework so if they go over, then it'll snap to min max
+	if(pos > _servos[ch]._minPosition.Get() && pos < _servos[ch]._maxPosition.Get())
+	{
+		HW_Timer2_SetPW_us(ch, pos);
+	}
+
+}
+*/
+
+/*----------------------------------------------------------------------------
+Name: SetPosition
+Desc: Sets the position of the servo in PWM Units
+	  and they must be between min ad max positions
+Ins	: ch   SERVO1/2/3
+	  pos  Position of the servo
+/ ---------------------------------------------------------------------------*/
+/*
+void Servo::CheckRegs(int servoNum)
+{
+	if(_position.HasAsyncSet()){
+		gServos.SetPosition(servoNum, _position.Get());
+	}
+	if(_active.HasAsyncSet()){
+
+	}
+	if(_minPosition.HasAsyncSet()){
+		SetMinRange(_minPosition.Get());
+	}
+	if(_maxPosition.HasAsyncSet()){
+		SetMaxRange(_maxPosition.Get());
+	}
+}
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

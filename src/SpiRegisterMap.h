@@ -23,7 +23,7 @@ enum RegMap_t
 	kRM_Motor1Power 	= 10,
 	kRM_Motor1Rpm 		= 11,
 	kRM_Motor1Break 	= 12,
-	kRM_Motor1Ppr 		= 13,
+	kRM_Motor1Cpr 		= 13,
 	kRM_Motor1Countdown = 14,
 	kRM_Motor1Encoder   = 15,
 	// P, I , D  ??
@@ -31,7 +31,7 @@ enum RegMap_t
 	kRM_Motor2Power 	= 20,
 	kRM_Motor2Rpm 		= 21,
 	kRM_Motor2Break 	= 22,
-	kRM_Motor2Ppr 		= 23,
+	kRM_Motor2Cpr 		= 23,
 	kRM_Motor2Countdowm = 24,
 	kRM_Motor2Encoder	= 25,
 	// P, I , D  ??
@@ -43,11 +43,20 @@ enum RegMap_t
 	kRM_Servo2Active 	= 41,
 	kRM_Servo3Active 	= 42,
 	// Room for more ...
+
 	kRM_Servo1Position  = 50,
 	kRM_Servo2Position  = 51,
 	kRM_Servo3Position  = 52,
 	// Room for more ...
 
+	kRM_Servo1MinRange = 53,
+	kRM_Servo2MinRange = 54,
+	kRM_Servo3MinRange = 55,
+
+	kRM_Servo1MaxRange = 56,
+	kRM_Servo2MaxRange = 57,
+	kRM_Servo3MaxRange = 58,
+	//Almost no room left
 
 	kRM_NoteTempo 		= 60,	// default
 	kRM_NoteLength 		= 61,
@@ -55,10 +64,10 @@ enum RegMap_t
 	kRM_NoteHertz 		= 63,	// 0-14k??
 
 	kRM_Gpio 			= 70,	    // BIT FIELD
-	kRM_Gpio1 			= 71,	    // individual bits
-	kRM_Gpio2 			= 72,	    // individual bits
-	kRM_Gpio3 			= 73,	    // individual bits
-	kRM_Gpio4 			= 74,	    // individual bits
+	kRM_GpioReadPins	= 71,	    //Output of the pins
+	kRM_GpioWritePins	= 72,	    //Input that the pins take
+	kRM_GpioMode		= 73,	    //Whether an input, output
+	kRM_GpioPullup		= 74,	    //Whether the input needs to be pulled up
 	kRM_GpioOutputMask,	// BIT FIELD
 
 	kRM_Count 			= 80,

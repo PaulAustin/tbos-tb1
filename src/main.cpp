@@ -28,6 +28,7 @@ SOFTWARE.
 #include "Sound.h"
 #include "Motor.h"
 #include "Servo.h"
+#include "Gpio.h"
 
 AValue gChargeStatus;
 AValue gVersion;
@@ -45,6 +46,7 @@ int main(void)
 	gEncoders.Init();
 	gMotors.Init();
 	gServos.Init();
+	gGpio.Init();
 	BQ_Init();
 
 	// Is this an option to allow vi register?
@@ -54,7 +56,6 @@ int main(void)
 	gRMap.SetValueObj(kRM_SystemStatus, &gVersion);
 	gVersion.Set(0x01000003);
 
-	// A short boot up set of notes.
 	int bootNote = 3;
 	int bootNotes[] = {0, 261, 329, 195, -1};
 	int chargeStat = 0;
@@ -69,6 +70,7 @@ int main(void)
 			gMotors.Run();
 			gEncoders.Run();
 			gServos.Run();
+			gGpio.Run();
 		}
 
 		if ( gTimer.is_100msec() ) {
@@ -88,7 +90,7 @@ int main(void)
 
 		if ( gTimer.is_500msec() ) {
 			// helpful for testing
-			// GPIO_Write(O4, 2);
+			//GPIO_Write(O4, 2);
 
 			// Periodically see if motors have been idle for a while. If so
 			// The 5V enable will be dropped.
@@ -98,7 +100,7 @@ int main(void)
 				BQ_5VCheckTimeout();
 			}
 
-			// chargeStat = BQ_ChargeStatus();
+			//chargeStat = BQ_ChargeStatus();
 			chargeStat = GPIO_Read(CHG_STAT);
 			gChargeStatus.Set(chargeStat);
 

@@ -188,11 +188,6 @@ public:
 		}
 		else if (_bytesRemaining > 0)
 		{
-			//Can only handle 16 bits
-			//Need to update for 32 bits
-			//Still trying to decide
-			//the best appraoch
-			
 			ev8 = (ev8 & 0x00ff);
 			switch(_bytesRemaining)
 			{
@@ -228,14 +223,15 @@ public:
 			switch(ev8)
 			{
 			case 0:
-				return(false);
+				_bytesRemaining = 1;
+				return(true);
 				break;
 			case EVT8_Int16:
-				_bytesRemaining = (3-1);
+				_bytesRemaining = 2;
 				return(true);
 				break;
 			case EVT8_Int32:
-				_bytesRemaining = (5-1);
+				_bytesRemaining = 4;
 				return(true);
 				break;
 			}
