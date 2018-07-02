@@ -51,7 +51,7 @@ int sNotesChromatic[] =
 void SoundManager::Init(void)
 {
 	// Default 60 BPM
-	noteTempo.Set(60);
+	noteTempo.Set(60); //Doesn't do anything
 	noteTempo.Reset();
 	// Length of note in 16th notes
 	noteLength.Set(25);
@@ -82,6 +82,9 @@ void SoundManager::PluckFrequency(int f)
 }
 void SoundManager::Run(void)
 {
+	if (noteLength.HasAsyncSet()){
+		noteLength.Set(noteLength.Get());
+	}
 	if (noteHertz.HasAsyncSet()) {
 		PluckFrequency(noteHertz.Get());
 	} else if (noteSolfege.HasAsyncSet()) {

@@ -25,6 +25,8 @@ SOFTWARE.
 
 #include <stdint.h>
 
+#define MAX_UPTIMERS  2
+
 class Timer {
 private:
 	bool flg_5ms;
@@ -35,7 +37,10 @@ private:
 	int ticks_5ms;
 	int ticks_100ms;
 	int ticks_500ms;
+
+
 public:
+	uint32_t uptimer[MAX_UPTIMERS];
 	bool is_5msec() {
 		if (flg_5ms) {
 			flg_5ms = false;
@@ -71,7 +76,16 @@ public:
 	};
 
 	void hwTick();
+
+
+
 };
+
+	void Time_StartTimer(uint8_t timerNum);
+	bool Time_isTimeOut(uint8_t timerNum, uint32_t timout_ms);
+	uint32_t Time_CheckTime(uint8_t timerNum);
+
+
 
 extern Timer gTimer;
 

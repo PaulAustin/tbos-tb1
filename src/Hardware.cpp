@@ -7,6 +7,7 @@
 #include "em_usart.h"
 #include "em_i2c.h"
 
+
 #include "Hardware.h"
 #include "Value.h"
 
@@ -35,10 +36,10 @@ static const gpioConfig_t gpioC[] =
 	{gpioPortB, 11, gpioModePushPull, 0},	//	BEEP,
 	{gpioPortB, 13, gpioModeInput, 0},		//	XTP,
 	{gpioPortB, 14, gpioModeInput, 0},		//	XTN,
-	{gpioPortC, 0, gpioModePushPull, 0},		//	IO6,
-	{gpioPortC, 1, gpioModeInput, 0},		//	IO7,
-	{gpioPortC, 2, gpioModeInput, 0},		//	IO8,
-	{gpioPortC, 3, gpioModeInput, 0},		//	IO9,
+	{gpioPortC, 0, gpioModeInputPull, 1},		//	IO6,
+	{gpioPortC, 1, gpioModeInputPull, 1},		//	IO7,
+	{gpioPortC, 2, gpioModeInputPull, 1},		//	IO8,
+	{gpioPortC, 3, gpioModeInputPull, 1},		//	IO9,
 	{gpioPortC, 4, gpioModeInput, 0},		//	CHG_STAT,
 	{gpioPortC, 8, gpioModePushPull, 0},	//	MOT_NSLEEP,
 	{gpioPortC, 9, gpioModePushPull, 0},		//	SPK_EN,
@@ -247,10 +248,10 @@ void HW_Timer1_SetFreq(uint16_t freq)
 
 //----------------------------------------------------------------------------
 // Name	: HW_Timer2_Init
-// Desc	: Setup Timer1: CC2 to drive the Beeper with a Square Wave
+// Desc	: Setup Timer2: CC?
 //		  HFPERCLK >> div-4 >> 16 bit counter
-//		  Counter wraps at TIMER1_TOP and Toggles the CC2 output
-//		  TImer1Top will be changed to get different frequencies
+//		  Counter wraps at TIMER2_TOP and
+//
 //		  No Interrupt
 //----------------------------------------------------------------------------
 void HW_Timer2_Init(void)
@@ -313,7 +314,7 @@ void HW_Timer2_Init(void)
 
 //----------------------------------------------------------------------------
 // Name	: HW_Timer2_Enable
-// Desc	: Enable or Disable Timer1
+// Desc	: Enable or Disable Timer2
 //----------------------------------------------------------------------------
 void HW_Timer2_Enable(bool enable)
 {
@@ -367,6 +368,42 @@ void HW_GPIO_Init(void)
 	{
 		GPIO_PinModeSet(gpioC[i].port, gpioC[i].pin, gpioC[i].mode, gpioC[i].out);
 	}
+}
+
+//----------------------------------------------------------------------------
+// Name	: HW_GPIO_SetMode
+// Desc	: Set a GPIO as Output or Input or InputPullup
+// Ins	: id	GPIO ID as defined in <hardware.h>
+//		  mode	0=Out 1=Input 2=InputPullup
+//		  out   default value of output state
+//----------------------------------------------------------------------------
+void HW_GPIO_SetMode(uint8_t id, uint8_t mode)
+{
+	GPIO_Mode_TypeDef pinmode;
+	int out = 0;
+
+	switch(mode)
+	{
+	//OUTPUT
+	case 0:
+		pinmode = gpioModePushPull;
+		out = 0;
+		break;
+	//INPUT
+	case 1:
+		pinmode = gpioModeInput;
+		out = 0;
+		break;
+	//INPUT PULLUP
+	case 2:
+		pinmode = gpioModeInputPull;
+		out = 1;
+		break;
+	}
+
+	GPIO_PinModeSet(gpioC[id].port, gpioC[id].pin, pinmode, out);
+
+
 }
 
 //----------------------------------------------------------------------------
