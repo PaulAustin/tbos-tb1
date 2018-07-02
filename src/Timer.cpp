@@ -41,6 +41,12 @@ void Timer::hwTick()
 		ticks_5ms++;
 		flg_5ms = 1;
 
+		// General Purpose CountUp Timers, increment at 1msec
+		for ( uint8_t i=0; i < MAX_UPTIMERS; i++ )
+		{
+			gTimer.uptimer[i]+=5;    // countUp timers, overflow after 49 days
+		}
+
 		if ( ticks_5ms == 20 ) {
 			// 100ms
 			flg_100ms = 1;
@@ -58,6 +64,37 @@ void Timer::hwTick()
 				ticks_500ms = 0;
 			}
 		}
+	}
+}
+
+void Time_StartTimer(uint8_t timerNum)
+{
+	if(timerNum < MAX_UPTIMERS)
+	{
+		gTimer.uptimer[timerNum] = 0;
+	}
+}
+
+bool Time_isTimeOut(uint8_t timerNum, uint32_t timeout_ms)
+{
+	if(timerNum < MAX_UPTIMERS)
+	{
+		if(gTimer.uptimer[timerNum] > timeout_ms)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+uint32_t Time_CheckTime(uint8_t timerNum)
+{
+	if(timerNum < MAX_UPTIMERS)
+	{
+		return(gTimer.uptimer[timerNum]);
+	}
+	else
+	{
+		return 0;
 	}
 }
 

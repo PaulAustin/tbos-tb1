@@ -36,21 +36,25 @@ class Servo {
 public:
 	AValue	_active;
 	AValue	_position;
+	//AValue  _minPosition;
+	//AValue  _maxPosition;
+public:
+	//void CheckRegs(int servoNum);
+	//void SetMinRange(int min);
+	//void SetMaxRange(int max);
 };
 
 class ServoManager {
 public:
-	Servo	_s1;
-	Servo	_s2;
-	Servo	_s3;
-
-	//Servo	_servos[kSERVO_Count];
+	Servo	_servos[kSERVO_Count];
 	AValue	_gpio;
 public:
 	void Init();
 	void Run();
 	void Stop(int ch);
 	void SetPeriod();
+	//void SetPosition(int ch, int pos);
+
 };
 
 extern ServoManager gServos;
