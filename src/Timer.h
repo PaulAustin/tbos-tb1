@@ -82,7 +82,7 @@ public:
 };
 
 	void Time_StartTimer(uint8_t timerNum);
-	bool Time_isTimeOut(uint8_t timerNum, uint32_t timout_ms);
+	bool Time_isTimeOut(uint8_t timerNum, uint32_t timeout_ms);
 	uint32_t Time_CheckTime(uint8_t timerNum);
 
 
