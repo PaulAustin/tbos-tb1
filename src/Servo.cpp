@@ -79,10 +79,12 @@ void ServoManager::Run(void)
 
 	for (int ch=kSERVO_1; ch < kSERVO_Count; ch++)
 	{
-
+		volatile int32_t servoPosition = 0;
+		servoPosition = _servos[ch]._position.Get();
 		// The HW timer channel match the Servo enum. 0, 1, 2
 		if(_servos[ch]._position.HasAsyncSet()){
 			HW_Timer2_SetPW_us(ch, _servos[ch]._position.Get());
+
 		}
 //		Servo_SetPW_us(ch, 10 /* _servos[ch].pw_us*/ );
 	}

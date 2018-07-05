@@ -44,7 +44,7 @@ void Timer::hwTick()
 		// General Purpose CountUp Timers, increment at 1msec
 		for ( uint8_t i=0; i < MAX_UPTIMERS; i++ )
 		{
-			gTimer.uptimer[i]+=5;    // countUp timers, overflow after 49 days
+			gTimer.uptimer[i]+=5;    // countUp timers
 		}
 
 		if ( ticks_5ms == 20 ) {

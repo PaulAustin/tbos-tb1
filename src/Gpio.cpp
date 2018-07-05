@@ -29,15 +29,6 @@ GpioManager gGpio;
 
 void GpioManager::Init(void){
 
-	//Reset the GPIO Pins
-	/*
-	GPIO_Write(O4, 0);
-	GPIO_Write(O5, 0);
-	GPIO_Write(IO6, 0);
-	GPIO_Write(IO7, 0);
-	GPIO_Write(IO8, 0);
-	GPIO_Write(IO9, 0);
-	*/
 	//Set the id to the hardware id
 	_Gpios[0]._id = O4;
 	_Gpios[1]._id = O5;
@@ -47,16 +38,12 @@ void GpioManager::Init(void){
 	_Gpios[5]._id = IO9;
 
 
-	//_Gpios[0]._mode = 1;
-	//_Gpios[1]._mode = 1;
-
 	//Set the modes to Inputs
-	/*
+
 	for(int i = 2; i < GPIO_NUM; i++)
 	{
 		HW_GPIO_SetMode(_Gpios[i]._id, 1);
 	}
-*/
 
 	//set values to the register map
 	gRMap.SetValueObj(kRM_GpioReadPins, &gpioOutput);
