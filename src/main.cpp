@@ -32,6 +32,7 @@ SOFTWARE.
 
 AValue gChargeStatus;
 AValue gVersion;
+AValue gByteOrderTest;
 
 int main(void)
 {
@@ -53,7 +54,9 @@ int main(void)
 	// BQ_WDenable(0);				// Disable
 
 	gRMap.SetValueObj(kRM_SystemFMVers1, &gVersion);
+	gRMap.SetValueObj(kRM_ByteOrderTest, &gByteOrderTest);
 	gRMap.SetValueObj(kRM_SystemStatus, &gVersion);
+	gByteOrderTest.Set(0x01020304);
 	gVersion.Set(0x01000003);
 
 	int bootNote = 3;

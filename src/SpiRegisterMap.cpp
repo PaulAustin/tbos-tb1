@@ -50,7 +50,7 @@ enum {
 	psGetReg = 2
 };
 
-static ValueReaderWriter gV8RW;
+// static ValueReaderWriter gV8RW;
 static int gReg = 0;
 static int gParam = 0;
 static int gPacketState = psCommand;
