@@ -26,7 +26,11 @@ SOFTWARE.
 
 GpioManager gGpio;
 
-
+/*------------------------------------------------------------------
+Name: GpioManager::Init()
+Description: Initializes all of the variables and pointers for the
+Gpio to function, is only called once from main.cpp.
+/ ----------------------------------------------------------------*/
 void GpioManager::Init(void){
 
 	//Set the id to the hardware id
@@ -53,7 +57,12 @@ void GpioManager::Init(void){
 }
 
 
-
+/*------------------------------------------------------------------
+Name: GpioManager::Run()
+Description: Main function being called, updates all of the gpio
+object variables and then sets the right mode and output. Sets the
+output byte to the register so it can be read.
+/ ----------------------------------------------------------------*/
 void GpioManager::Run()
 {
 	//Update the individual bits of info

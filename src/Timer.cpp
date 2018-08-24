@@ -66,7 +66,11 @@ void Timer::hwTick()
 		}
 	}
 }
-
+//----------------------------------------------------------------------------
+// Name: Time_CheckTime
+// Desc: Restarts the timer back at zero
+//		 timerNum: The index of the timer in the array of timers
+//----------------------------------------------------------------------------
 void Time_StartTimer(uint8_t timerNum)
 {
 	if(timerNum < MAX_UPTIMERS)
@@ -74,7 +78,12 @@ void Time_StartTimer(uint8_t timerNum)
 		gTimer.uptimer[timerNum] = 0;
 	}
 }
-
+//----------------------------------------------------------------------------
+// Name: Time_isTimeOut
+// Desc: Checks to see if the timer has been running to long
+//		 timerNum: The index of the timer in the array of timers
+//		 timeout_ms: Amount of time that needs to pass for the timer to timeout
+//----------------------------------------------------------------------------
 bool Time_isTimeOut(uint8_t timerNum, uint32_t timeout_ms)
 {
 	if(timerNum < MAX_UPTIMERS)
@@ -86,6 +95,11 @@ bool Time_isTimeOut(uint8_t timerNum, uint32_t timeout_ms)
 	}
 	return false;
 }
+//----------------------------------------------------------------------------
+// Name: Time_CheckTime
+// Desc: returns the time that the timer has been running for
+//		 timerNum: The index of the timer in the array of timers
+//----------------------------------------------------------------------------
 uint32_t Time_CheckTime(uint8_t timerNum)
 {
 	if(timerNum < MAX_UPTIMERS)
