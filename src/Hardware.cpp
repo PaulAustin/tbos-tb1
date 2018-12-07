@@ -1,3 +1,4 @@
+//#include "em_syetem.h"
 #include "em_cmu.h"
 #include "em_timer.h"
 #include "em_gpio.h"
@@ -6,7 +7,6 @@
 #include "em_chip.h"
 #include "em_usart.h"
 #include "em_i2c.h"
-
 
 #include "Hardware.h"
 #include "Value.h"
@@ -36,13 +36,13 @@ static const gpioConfig_t gpioC[] =
 	{gpioPortB, 11, gpioModePushPull, 0},	//	BEEP,
 	{gpioPortB, 13, gpioModeInput, 0},		//	XTP,
 	{gpioPortB, 14, gpioModeInput, 0},		//	XTN,
-	{gpioPortC, 0, gpioModeInput, 0},		//	IO6,
+	{gpioPortC, 0, gpioModePushPull, 0},	//	IO6,
 	{gpioPortC, 1, gpioModeInput, 0},		//	IO7,
 	{gpioPortC, 2, gpioModeInput, 0},		//	IO8,
 	{gpioPortC, 3, gpioModeInput, 0},		//	IO9,
 	{gpioPortC, 4, gpioModeInput, 0},		//	CHG_STAT,
 	{gpioPortC, 8, gpioModePushPull, 0},	//	MOT_NSLEEP,
-	{gpioPortC, 9, gpioModePushPull, 0},		//	SPK_EN,
+	{gpioPortC, 9, gpioModePushPull, 0},	//	SPK_EN,
 	{gpioPortC, 10, gpioModeInput, 0},		//	CHG_INT,
 	{gpioPortC, 14, gpioModeInput, 0},		//	USB_DM,
 	{gpioPortC, 15, gpioModeInput, 0},		//	USB_DP,
@@ -250,8 +250,8 @@ void HW_Timer1_SetFreq(uint16_t freq)
 // Name	: HW_Timer2_Init
 // Desc	: Setup Timer2: CC?
 //		  HFPERCLK >> div-4 >> 16 bit counter
-//		  Counter wraps at TIMER2_TOP and
-//
+//		  Counter wraps at TIMER2_TOP and Toggles the CC2 output
+//		  TImer2Top will be changed to get different frequencies
 //		  No Interrupt
 //----------------------------------------------------------------------------
 void HW_Timer2_Init(void)
@@ -402,7 +402,6 @@ void HW_GPIO_SetMode(uint8_t id, uint8_t mode)
 	}
 
 	GPIO_PinModeSet(gpioC[id].port, gpioC[id].pin, pinmode, out);
-
 
 }
 
@@ -668,6 +667,10 @@ int I2C0_WriteReg(uint8_t addr, uint8_t reg, uint8_t * pBuf, uint8_t len)
 	}
 	seq.buf[0].data = data;	// ptr to outgoing data
 	seq.buf[0].len = 1+len;	// len of outgoing data
+
+	// Setup incoming destination (NONE)
+	//seq.buf[1].data =
+	//seq.buf[1].len =
 
 	// Do a polled transfer
 	m_I2C_Status = I2C_TransferInit(I2C0, &seq);

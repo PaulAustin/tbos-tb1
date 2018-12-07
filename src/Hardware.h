@@ -11,6 +11,7 @@ void HW_Timer2_SetPW_us(uint8_t ch, uint16_t pw);
 void GPIO_Write(uint8_t id, uint8_t out);
 bool GPIO_Read(uint8_t id);
 void HW_GPIO_SetMode(uint8_t id, uint8_t mode);
+
 int I2C0_ReadReg(uint8_t addr, uint8_t reg, uint8_t * pBuf, uint8_t len);
 int I2C0_WriteReg(uint8_t addr, uint8_t reg, uint8_t * pBuf, uint8_t len);
 
