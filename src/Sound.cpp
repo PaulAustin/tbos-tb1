@@ -68,11 +68,9 @@ void SoundManager::Init(void)
 {
 	_noteBeatsRemaining = 0;
 	// Default 60 BPM
-	_noteTempo.AsyncSet(60);
+	_noteTempo.Set(60);
 	// Length of note in 16th notes
 	_noteLength.Set(125);
-	_noteLength.HasAsyncSet();
-	_noteTempo.HasAsyncSet();
 
 	gRMap.SetValueObj(kRM_NoteTempo, &_noteTempo);
 	gRMap.SetValueObj(kRM_NoteLength, &_noteLength);
