@@ -20,19 +20,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef SOUND_H_
-#define SOUND_H_
-
 #include "Value.h"
 
 class SoundManager {
 private:
-	AValue noteTempo;
-	AValue noteLength;
-	AValue noteSolfege;
-	AValue noteHertz;
-	AValue noteStatus;
-	int _noteTimeRemaining;
+	Value noteTempo;
+	Value noteLength;
+	Value noteSolfege;
+	Value noteHertz;
+	Value noteStatus;
 
 public:
 	void Init();
@@ -40,6 +36,5 @@ public:
 	void PluckFrequency(int f);
 };
 
-extern SoundManager gSound;
 
-#endif // SOUND_H_
+extern SoundManager gSound;
