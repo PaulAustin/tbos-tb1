@@ -30,19 +30,19 @@ SOFTWARE.
 #include "Servo.h"
 #include "Gpio.h"
 
-AValue gChargeStatus;
-AValue gVersion;
-AValue gByteOrderTest;
+
+Value gChargeStatus;
+Value gVersion;
+Value gByteOrderTest;
+
 
 int main(void)
 {
-	// Set up SPI IO register map before setting up interrupts.
+	/* Chip errata */
 	gRMap.Init();
-
-	// Chip IO and interrupt configurations.
 	HW_Init();
 
-	// start the IO sub system
+//	Sys_Status_Init();
 	gSound.Init();
 	gEncoders.Init();
 	gMotors.Init();
@@ -50,7 +50,8 @@ int main(void)
 	gGpio.Init();
 	BQ_Init();
 
-	// Is this an option to allow vi register?
+	GPIO_Write(SPK_EN, 1);		// Turn on op-amp for speaker
+	// BQ_5Venable(1);			// ToDo:  later this will be controlled
 	// BQ_WDenable(0);				// Disable
 
 	gRMap.SetValueObj(kRM_SystemFMVers1, &gVersion);
@@ -59,16 +60,24 @@ int main(void)
 	gByteOrderTest.Set(0x01020304);
 	gVersion.Set(0x01000003);
 
-	int bootNote = 3;
+	GPIO_Write(O5, 1);
+	GPIO_Write(O4, 1);
+	GPIO_Write(MOT2_R, 0);
+	GPIO_Write(MOT1_R, 0);
+
+	GPIO_Write(O4, 2);
+
+	int bootNote = 2;
 	int bootNotes[] = {0, 261, 329, 195, -1};
 	int chargeStat = 0;
     int i= 0;
 
-	// Infinite loop
+	/* Infinite loop */
 	while (1)
 	{
-		// Move values from SPI register bank at periodic steps.
-		if ( gTimer.is_5msec() ) {
+		// Move values from register bank at periodic steps.
+		// this might be a bit faster than needed. 100Hz would be a minimum.
+		if ( gTimer.is_2msec() ) {
 			gSound.Run();
 			gMotors.Run();
 			gEncoders.Run();
@@ -76,25 +85,7 @@ int main(void)
 			gGpio.Run();
 		}
 
-		if ( gTimer.is_100msec() ) {
-			// TODO this is still a bit of a hack.
-			// once tunes work again use that approach instead.
-			if (bootNote >= 0) {
-				int pitch = bootNotes[bootNote];
-				if (pitch > 0) {
-					HW_Timer1_SetFreq(pitch);
-					HW_Timer1_Enable(true);   // Start Playing
-				} else if (pitch == 0){
-					HW_Timer1_Enable(false);  // Stop Playing
-				}
-				bootNote--;
-			}
-		}
-
 		if ( gTimer.is_500msec() ) {
-			// helpful for testing
-			//GPIO_Write(O4, 2);
-
 			// Periodically see if motors have been idle for a while. If so
 			// The 5V enable will be dropped.
 			BQ_5VUsagePing();
@@ -110,6 +101,14 @@ int main(void)
 			i++;
 			if (i % 20 == 0 ) {
 				BQ_IinLim(kBQ_IinLimit_500mA);
+			}
+
+			if (bootNote >= 0) {
+				int pitch = bootNotes[bootNote];
+				if (pitch > 0) {
+					gSound.PluckFrequency(pitch);
+				}
+				bootNote--;
 			}
 		}
 	}

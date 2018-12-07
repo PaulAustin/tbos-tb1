@@ -22,7 +22,7 @@ SOFTWARE.
 
 #include <stdint.h>
 #include "em_timer.h"
-#include "em_int.h"
+#include "em_int.h"		// we use INT_Disable/Enable
 #include "em_gpio.h"
 
 #include "Hardware.h"
@@ -30,87 +30,56 @@ SOFTWARE.
 #include "Motor.h"
 #include "Encoder.h"
 
+typedef struct
+{
+	uint32_t uptimer[MAX_TIMERS];  // 32 bit = 49 days at 1msec...
+} systime_t;
+
 Timer gTimer;
+systime_t m_Time;
 
 void Timer::hwTick()
 {
 	ticks_hw++;
-	if ( ticks_hw == (5000/TICK_PERIOD_us) ) {
-		// 5000usec = 5msec
+	if ( ticks_hw == (2000/TICK_PERIOD_us) ) {
+		// 1000usec = 1msec
 		ticks_hw = 0;
-		ticks_5ms++;
-		flg_5ms = 1;
-
-		// General Purpose CountUp Timers, increment at 1msec
-		for ( uint8_t i=0; i < MAX_UPTIMERS; i++ )
-		{
-			gTimer.uptimer[i]+=5;    // countUp timers
+		ticks_2ms++;
+		flg_2ms = 1;
+		// General Purpose CountUp Timers, increment at 2msec
+		for (int i=0; i < MAX_TIMERS; i++ ) {
+			m_Time.uptimer[i] += 2;    // countUp timers, overflow after 49 days
 		}
 
-		if ( ticks_5ms == 20 ) {
-			// 100ms
-			flg_100ms = 1;
-			ticks_5ms=0;
-			ticks_100ms++;
+		if ( ticks_2ms == 5 ) {
+			// 10 ms
+			ticks_2ms=0;
+			ticks_10ms++;
+			flg_10ms = 1;
+
+			// All other ms based timers will be on 10ms boundaries
+			if ( ticks_10ms == 10 ) {
+				// 100ms
+				ticks_10ms=0;
+				ticks_100ms++;
+				flg_100ms = 1;
+			}
 			if ( ticks_100ms == 5 ) {
-				// half second
-				flg_500ms = 1;
+				// halfsec
 				ticks_100ms = 0;
 				ticks_500ms++;
+				flg_500ms = 1;
 			}
 			if ( ticks_500ms == 2 ) {
-				// one second
-				flg_1sec = 1;
+				// onesec
 				ticks_500ms = 0;
+				flg_1sec = 1;
 			}
 		}
 	}
 }
-//----------------------------------------------------------------------------
-// Name: Time_CheckTime
-// Desc: Restarts the timer back at zero
-//		 timerNum: The index of the timer in the array of timers
-//----------------------------------------------------------------------------
-void Time_StartTimer(uint8_t timerNum)
-{
-	if(timerNum < MAX_UPTIMERS)
-	{
-		gTimer.uptimer[timerNum] = 0;
-	}
-}
-//----------------------------------------------------------------------------
-// Name: Time_isTimeOut
-// Desc: Checks to see if the timer has been running to long
-//		 timerNum: The index of the timer in the array of timers
-//		 timeout_ms: Amount of time that needs to pass for the timer to timeout
-//----------------------------------------------------------------------------
-bool Time_isTimeOut(uint8_t timerNum, uint32_t timeout_ms)
-{
-	if(timerNum < MAX_UPTIMERS)
-	{
-		if(gTimer.uptimer[timerNum] > timeout_ms)
-		{
-			return true;
-		}
-	}
-	return false;
-}
-//----------------------------------------------------------------------------
-// Name: Time_CheckTime
-// Desc: returns the time that the timer has been running for
-//		 timerNum: The index of the timer in the array of timers
-//----------------------------------------------------------------------------
-uint32_t Time_CheckTime(uint8_t timerNum)
-{
-	if(timerNum < MAX_UPTIMERS)
-	{
-		return(gTimer.uptimer[timerNum]);
-	}
-	else
-	{
-		return 0;
-	}
-}
+
+
 
 //----------------------------------------------------------------------------
 // Name: Timer0 ISR handler
@@ -119,8 +88,58 @@ uint32_t Time_CheckTime(uint8_t timerNum)
 //----------------------------------------------------------------------------
 extern "C" void TIMER0_IRQHandler(void)
 {
+
 	TIMER_IntClear(TIMER0, TIMER_IF_OF);      // Clear overflow flag
+
+	// PFA GPIO_SET(gpio_O4);
 	gEncoders.RunISR();
 	gMotors.RunISR();
+	// PFA GPIO_CLR(gpio_O4);
 	gTimer.hwTick();
+}
+
+/*----------------------------------------------------------------------------
+Name: Time_StartTimer
+Desc: Start a selected Timer
+Ins	: timernum	must be leass than MAX_TIMERS
+Outs:
+/ ---------------------------------------------------------------------------*/
+void Time_StartTimer( uint8_t timernum )
+{
+	if ( timernum < MAX_TIMERS ) {
+		m_Time.uptimer[timernum]=0;
+	}
+}
+
+/*----------------------------------------------------------------------------
+Name: Time_isTimeout
+Desc: Check for elapsed time.  Timer must have been started first with StartTimer
+Ins	: timernum		must be leass than MAX_TIMERS
+	  timeout_ms	period to compare against
+Outs: TRUE when timer has run past the specified timeout
+	  FALSE otherwise (or is an invalid timernum was specified
+/ ---------------------------------------------------------------------------*/
+bool Time_isTimeout( uint8_t timernum, uint32_t timeout_ms )
+{
+	if ( timernum < MAX_TIMERS ) {
+		if ( m_Time.uptimer[timernum] > timeout_ms ) {
+			return( true );
+		}
+	}
+	return( false );
+}
+
+/*----------------------------------------------------------------------------
+Name: Time_CheckTime
+Desc: Return the time elapsed since Time_StartTimer
+Ins	: timernum		must be leass than MAX_TIMERS
+Outs: time in msec
+/ ---------------------------------------------------------------------------*/
+uint32_t Time_CheckTime(uint8_t timernum)
+{
+	if (timernum < MAX_TIMERS) {
+		return( m_Time.uptimer[timernum]);
+	} else {
+		return 0;
+	}
 }

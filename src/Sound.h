@@ -29,7 +29,7 @@ private:
 	Value 	_noteSolfege;
 	Value 	_noteHertz;
 	Value 	_noteStatus;
-	int 	_noteBeatsRemaining = 0;
+	int 	_noteBeatsRemaining;
 
 public:
 	void Init();

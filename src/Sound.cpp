@@ -66,11 +66,11 @@ int sNotesChromatic[] =
 
 void SoundManager::Init(void)
 {
+	_noteBeatsRemaining = 0;
 	// Default 60 BPM
-	_noteTempo.Set(60);
+	_noteTempo.AsyncSet(60);
 	// Length of note in 16th notes
 	_noteLength.Set(125);
-
 	_noteLength.HasAsyncSet();
 	_noteTempo.HasAsyncSet();
 
