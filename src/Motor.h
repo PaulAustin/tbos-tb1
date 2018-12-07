@@ -28,8 +28,8 @@ SOFTWARE.
 class Motor
 {
 public:
-	AValue 	_power;
-	AValue 	_break;
+	Value 	_power;
+	Value 	_break;
 	int32_t _lastEncoderCount;
 	int32_t _targetDeltaCount;
 	int32_t _cumulativeError;

@@ -31,13 +31,16 @@ SOFTWARE.
 // and SW DIO for encoder reading. Math indicates that sampling at 4kHz
 // should be OK.
 
-uint8_t pwmWidth;
-uint8_t pwmTic;
+uint8_t gPwmWidth;
+uint8_t gPwmTic;
 
 MotorManager gMotors;
 
 void MotorManager::Init(void)
 {
+	gPwmWidth = 10;
+	gPwmTic = 0;
+
 	// Clear GPI for the HBridge so no power to the motor.
 	GPIO_Write(MOT1_F, 0);
 	GPIO_Write(MOT1_R, 0);
@@ -45,17 +48,11 @@ void MotorManager::Init(void)
 	GPIO_Write(MOT2_R, 0);
 	GPIO_Write(MOT_NSLEEP, 1);
 
-	pwmWidth = 10;
-	pwmTic = 0;
-
-	// value registers for power
 	gRMap.SetValueObj(kRM_Motor1Power, &_m1._power);
 	gRMap.SetValueObj(kRM_Motor2Power, &_m2._power);
 
-	// trigger registers for break
 	gRMap.SetValueObj(kRM_Motor1Break, &_m1._break);
 	gRMap.SetValueObj(kRM_Motor2Break, &_m2._break);
-
 }
 
 #define MOTOR_TUNING_INTERVAL 20
@@ -107,6 +104,7 @@ Motor_SetPWM - Motor/Encoder State Machine
 void Motor::SetPower(int power) {
 
 	int ticEdge = abs(power+5) / 10;
+
 	if (ticEdge > 10)
 		ticEdge = 10;
 
@@ -168,12 +166,12 @@ void MotorManager::RunISR()
 	// are configured so the F or R will always be low, unless
 	// the motors are stopped with break mode.
 
-	pwmTic++;
-	if (pwmTic >= pwmWidth) {
-		pwmTic = 0;
+	gPwmTic++;
+	if (gPwmTic >= gPwmWidth) {
+		gPwmTic = 0;
 	}
-	GPIO_WRITE(gpio_MOT1_F, _m1._pwmHighF > pwmTic);
-	GPIO_WRITE(gpio_MOT1_R, _m1._pwmHighR > pwmTic);
-	GPIO_WRITE(gpio_MOT2_F, _m2._pwmHighF > pwmTic);
-	GPIO_WRITE(gpio_MOT2_R, _m2._pwmHighR > pwmTic);
+	GPIO_WRITE(gpio_MOT1_F, _m1._pwmHighF > gPwmTic);
+	GPIO_WRITE(gpio_MOT1_R, _m1._pwmHighR > gPwmTic);
+	GPIO_WRITE(gpio_MOT2_F, _m2._pwmHighF > gPwmTic);
+	GPIO_WRITE(gpio_MOT2_R, _m2._pwmHighR > gPwmTic);
 }
