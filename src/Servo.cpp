@@ -20,8 +20,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
-
-
 TODO:
  - Figure out how to set the PWM for the servo
 */
@@ -43,19 +41,19 @@ void ServoManager::Init(void)
 {
 	SetPeriod();
 
-	gRMap.SetValueObj(kRM_Servo1Active, &_servos[kSERVO_1]._active);
-	gRMap.SetValueObj(kRM_Servo1Position, &_servos[kSERVO_1]._position);
+	gRMap.SetValueObj(kRM_Servo1Active, &_s1._active);
+	gRMap.SetValueObj(kRM_Servo1Position, &_s1._position);
 	//gRMap.SetValueObj(kRM_Servo1MinRange, &_servos[kSERVO_1]._minPosition);
 	//gRMap.SetValueObj(kRM_Servo1MaxRange, &_servos[kSERVO_1]._maxPosition);
 
 
-	gRMap.SetValueObj(kRM_Servo2Active, &_servos[kSERVO_2]._active);
-	gRMap.SetValueObj(kRM_Servo2Position, &_servos[kSERVO_2]._position);
+	gRMap.SetValueObj(kRM_Servo2Active, &_s2._active);
+	gRMap.SetValueObj(kRM_Servo2Position, &_s2._position);
 	//gRMap.SetValueObj(kRM_Servo2MinRange, &_servos[kSERVO_2]._minPosition);
 	//gRMap.SetValueObj(kRM_Servo2MaxRange, &_servos[kSERVO_2]._maxPosition);
 
-	gRMap.SetValueObj(kRM_Servo3Active, &_servos[kSERVO_3]._active);
-	gRMap.SetValueObj(kRM_Servo3Position, &_servos[kSERVO_3]._position);
+	gRMap.SetValueObj(kRM_Servo3Active, &_s3._active);
+	gRMap.SetValueObj(kRM_Servo3Position, &_s3._position);
 	//gRMap.SetValueObj(kRM_Servo3MinRange, &_servos[kSERVO_3]._minPosition);
 	//gRMap.SetValueObj(kRM_Servo3MaxRange, &_servos[kSERVO_3]._maxPosition);
 
@@ -77,17 +75,20 @@ Desc: Servo State Machine
 void ServoManager::Run(void)
 {
 
-	for (int ch=kSERVO_1; ch < kSERVO_Count; ch++)
-	{
-		volatile int32_t servoPosition = 0;
-		servoPosition = _servos[ch]._position.Get();
-		// The HW timer channel match the Servo enum. 0, 1, 2
-		if(_servos[ch]._position.HasAsyncSet()){
-			HW_Timer2_SetPW_us(ch, _servos[ch]._position.Get());
+	volatile int32_t servoPosition = 0;
+	servoPosition = _s1._position.Get();
+	if(_s1._position.HasAsyncSet()){
+		HW_Timer2_SetPW_us(0, _s1._position.Get());
 
-		}
+	servoPosition = _s1._position.Get();
+	if(_s1._position.HasAsyncSet()){
+		HW_Timer2_SetPW_us(1, _s1._position.Get());
+
+	servoPosition = _s1._position.Get();
+	if(_s1._position.HasAsyncSet()){
+		HW_Timer2_SetPW_us(2, _s1._position.Get());
+
 //		Servo_SetPW_us(ch, 10 /* _servos[ch].pw_us*/ );
-	}
 /*
 	if (_gpio.HasAsyncSet()) {
 		// If the bit field has change update all Io
@@ -101,8 +102,6 @@ void ServoManager::Run(void)
 		// GPIO_Write(IO9, bits & 0x08 ? 1 : 0);
 	}
 */
-
-
 	//kRM_Gpio1
 
 #if 0
@@ -232,7 +231,6 @@ void Servo::CheckRegs(int servoNum)
 	}
 }
 */
-
 
 
 

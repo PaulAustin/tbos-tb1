@@ -1,8 +1,24 @@
-/*============================================================================
- Title	: Spi0.h
- Desc	: SPI on USART0
- 2017-05-21	DaraiusH
-/ ===========================================================================*/
+/*
+Copyright (c) 2018 Trashbots, Inc. - SDG
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 #ifndef SPIREGISTERMAP_H_
 #define SPIREGISTERMAP_H_
@@ -38,6 +54,7 @@ enum RegMap_t
 	// P, I , D  ??
 
 
+	kRM_MotorResetEncoder = 32,
 	kRM_MotorRpmSampleRate = 33, // typically about 10Hz
 
 	kRM_Servo1Active	= 40, // 0:off,   1:0-2ms, O:custom ???
@@ -57,7 +74,6 @@ enum RegMap_t
 	kRM_Servo1MaxRange = 56,
 	kRM_Servo2MaxRange = 57,
 	kRM_Servo3MaxRange = 58,
-	//Almost no room left
 
 	kRM_NoteTempo 		= 60,	// default
 	kRM_NoteLength 		= 61,
@@ -76,12 +92,10 @@ enum RegMap_t
 
 class RegisterMap {
 public:
-	ATrigger* _registers[kRM_Count];
+	Value* _registers[kRM_Count];
 public:
 	void Init();  // global constructors cause problems since they are before main
-	void SetValueObj(int id, ATrigger* vobj) { _registers[id] = vobj; }
-	void ASet(int id, int value)  { _registers[id]->ASet(value); }
-	int Get(int id)  { return _registers[id]->Get(); }
+	void SetValueObj(int id, Value* vobj) { _registers[id] = vobj; }
 	void WriteDotted(int id, int dotted, int value);
 	bool Changed(int id);
 };

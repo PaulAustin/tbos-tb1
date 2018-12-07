@@ -177,8 +177,3 @@ void GpioManager::Run()
 	gpioOutput.Set(output);
 	//GPIO_Write(O4, 0);
 }
-
-
-
-
-

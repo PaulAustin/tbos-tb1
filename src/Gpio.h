@@ -27,7 +27,6 @@ SOFTWARE.
 #include "Value.h"
 
 
-
 class Gpio{
 public:
 	int _id;
@@ -40,10 +39,10 @@ public:
 
 class GpioManager {
 private:
-	AValue gpioOutput;
-	AValue gpioInput;
-	AValue gpioMode;
-	AValue gpioPullup;
+	Value gpioOutput;
+	Value gpioInput;
+	Value gpioMode;
+	Value gpioPullup;
 
 public:
 	Gpio _Gpios[GPIO_NUM];

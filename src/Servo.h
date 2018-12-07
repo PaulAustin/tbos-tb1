@@ -25,17 +25,10 @@ SOFTWARE.
 
 #include "Value.h"
 
-enum {
-	kSERVO_1 = 0,
-	kSERVO_2 = 1,
-	kSERVO_3 = 2,
-	kSERVO_Count
-};
-
 class Servo {
 public:
-	AValue	_active;
-	AValue	_position;
+	Value	_active;
+	Value	_position;
 	//AValue  _minPosition;
 	//AValue  _maxPosition;
 public:
@@ -46,8 +39,10 @@ public:
 
 class ServoManager {
 public:
-	Servo	_servos[kSERVO_Count];
-	AValue	_gpio;
+	Servo	_s1;
+	Servo	_s2;
+	Servo	_s3;
+	Value	_gpio;
 public:
 	void Init();
 	void Run();
