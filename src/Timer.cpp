@@ -40,40 +40,40 @@ systime_t m_Time;
 
 void Timer::hwTick()
 {
-	ticks_hw++;
-	if ( ticks_hw == (2000/TICK_PERIOD_us) ) {
+	_hwTicks++;
+	if ( _hwTicks == (2000/TICK_PERIOD_us) ) {
 		// 1000usec = 1msec
-		ticks_hw = 0;
-		ticks_2ms++;
-		flg_2ms = 1;
+		_hwTicks = 0;
+		_2msTicks++;
+		_2ms = 1;
 		// General Purpose CountUp Timers, increment at 2msec
 		for (int i=0; i < MAX_TIMERS; i++ ) {
 			m_Time.uptimer[i] += 2;    // countUp timers, overflow after 49 days
 		}
 
-		if ( ticks_2ms == 5 ) {
+		if ( _2msTicks == 5 ) {
 			// 10 ms
-			ticks_2ms=0;
-			ticks_10ms++;
-			flg_10ms = 1;
+			_2msTicks=0;
+			_10msTicks++;
+			_10ms = 1;
 
 			// All other ms based timers will be on 10ms boundaries
-			if ( ticks_10ms == 10 ) {
+			if (_10msTicks == 10 ) {
 				// 100ms
-				ticks_10ms=0;
-				ticks_100ms++;
-				flg_100ms = 1;
+				_10msTicks=0;
+				_100msTicks++;
+				_100ms = 1;
 			}
-			if ( ticks_100ms == 5 ) {
-				// halfsec
-				ticks_100ms = 0;
-				ticks_500ms++;
-				flg_500ms = 1;
+			if ( _100msTicks == 5 ) {
+				// half second
+				_100msTicks = 0;
+				_500msTicks++;
+				_500ms = 1;
 			}
-			if ( ticks_500ms == 2 ) {
-				// onesec
-				ticks_500ms = 0;
-				flg_1sec = 1;
+			if ( _500msTicks == 2 ) {
+				// one second
+				_500msTicks = 0;
+				_1sec = 1;
 			}
 		}
 	}
