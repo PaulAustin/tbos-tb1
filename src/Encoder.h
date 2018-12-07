@@ -25,36 +25,41 @@ SOFTWARE.
 
 #include "Value.h"
 
+/*
+void Encoder_Init(void);
+void Encoder_Run(void);
+void Encoder_RunISR(void);
+int32_t Encoder_ReadCount(int);
+*/
+
 class Encoder {
 public:
+	void 	Init();
+	void 	CalcRPM();
+public:
 	// ValueRegisters
-	AValue 	_ppr;
-	AValue 	_count;
-	AValue 	_rpm;
+	Value 	_ppr;
+	Value 	_count;
+	Value 	_rpm;
 	int		_lastCount;
 	// Used by ISR
 	int 	_countEdge;  // count on A edge
 	bool 	_lastEdgeA;
-public:
-	void Init();
-	void Run();
-	void CalcRPM();
 };
 
 class EncoderManager
 {
 public:
-	Encoder _e1;
-	Encoder _e2;
-public:
+	Value _resetTrigger;
 	void 	Init();
 	void 	RunISR();
-	void 	CalckRPM();
+	void 	CalcRPM();
 	void 	Run();
-	Encoder	_encoders[2];
-
+	Encoder	_e1;
+	Encoder	_e2;
 };
 
 extern EncoderManager gEncoders;
+
 
 #endif /* ENCODER_H_ */

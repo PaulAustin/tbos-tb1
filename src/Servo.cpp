@@ -75,18 +75,17 @@ Desc: Servo State Machine
 void ServoManager::Run(void)
 {
 
-	volatile int32_t servoPosition = 0;
-	servoPosition = _s1._position.Get();
 	if(_s1._position.HasAsyncSet()){
 		HW_Timer2_SetPW_us(0, _s1._position.Get());
+	}
 
-	servoPosition = _s1._position.Get();
-	if(_s1._position.HasAsyncSet()){
-		HW_Timer2_SetPW_us(1, _s1._position.Get());
+	if(_s2._position.HasAsyncSet()){
+		HW_Timer2_SetPW_us(1, _s2._position.Get());
+	}
 
-	servoPosition = _s1._position.Get();
-	if(_s1._position.HasAsyncSet()){
-		HW_Timer2_SetPW_us(2, _s1._position.Get());
+	if(_s3._position.HasAsyncSet()){
+		HW_Timer2_SetPW_us(2, _s3._position.Get());
+	}
 
 //		Servo_SetPW_us(ch, 10 /* _servos[ch].pw_us*/ );
 /*

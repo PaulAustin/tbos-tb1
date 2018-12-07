@@ -53,7 +53,6 @@ enum RegMap_t
 	kRM_Motor2Encoder	= 25,
 	// P, I , D  ??
 
-
 	kRM_MotorResetEncoder = 32,
 	kRM_MotorRpmSampleRate = 33, // typically about 10Hz
 

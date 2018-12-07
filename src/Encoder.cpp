@@ -26,6 +26,8 @@ SOFTWARE.
 
 EncoderManager gEncoders;
 
+/*------------------------------------------------------------------
+/ ----------------------------------------------------------------*/
 
 //------------------------------------------------------------------
 void Encoder::Init() {
@@ -34,20 +36,8 @@ void Encoder::Init() {
 	_rpm.Set(0);
 }
 
-//------------------------------------------------------------------
-void Encoder::Run() {
-	if (_count.HasAsyncSet()) {
-		// If register was written to then update the low level value.
-		// this is typically used to reset the counter.
-		_countEdge = _count.Get();
-	} else {
-		// Otherwise copy level counter to register.
-		_count.Set(_countEdge);
-	}
-}
-
-//------------------------------------------------------------------
-void Encoder::CalcRPM() {
+void Encoder::CalcRPM()
+{
 	int current = _count.Get();
 	int rpm = ( current - _lastCount) * 10 / _ppr.Get();
 	_rpm.Set(rpm);
@@ -58,11 +48,9 @@ void EncoderManager::Init(void)
 {
 	gRMap.SetValueObj(kRM_Motor1Encoder, &_e1._count);
 	gRMap.SetValueObj(kRM_Motor1Rpm, &_e1._rpm);
-	gRMap.SetValueObj(kRM_Motor1Cpr, &_e1._ppr);
 
 	gRMap.SetValueObj(kRM_Motor2Encoder, &_e2._count);
 	gRMap.SetValueObj(kRM_Motor2Rpm, &_e2._rpm);
-	gRMap.SetValueObj(kRM_Motor2Cpr, &_e2._ppr);
 }
 
 /*----------------------------------------------------------------------------
@@ -89,7 +77,6 @@ void EncoderManager::RunISR()
 
 	qA = GPIO_READ(gpio_ENC2_QA);
 	qB = GPIO_READ(gpio_ENC2_QB);
-
 	if (_e2._lastEdgeA != qA) {
 		_e2._lastEdgeA = qA;
 		if (qA) {
@@ -106,14 +93,20 @@ Name: Encoder_Run
 / ---------------------------------------------------------------------------*/
 void EncoderManager::Run(void)
 {
-	_e1.Run();
-	_e2.Run();
+	// See if encoder clear register was written to.
+	if ( _resetTrigger.HasAsyncSet() ) {
+		_e1._countEdge = 0;
+		_e2._countEdge = 0;
+	}
+
+	// Map low lever ISR value to registers
+	_e1._count.Set(_e1._countEdge);
+	_e2._count.Set(_e2._countEdge);
+	_e1._count.HasAsyncSet();
+	_e2._count.HasAsyncSet();
 }
 
-/*------------------------------------------------------------------
-/ ----------------------------------------------------------------*/
-// TODO: not done/tested
-void EncoderManager::CalckRPM()
+void EncoderManager::CalcRPM()
 {
 	_e1.CalcRPM();
 	_e2.CalcRPM();
