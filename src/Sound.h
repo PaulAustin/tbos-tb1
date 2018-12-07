@@ -24,17 +24,17 @@ SOFTWARE.
 
 class SoundManager {
 private:
-	Value noteTempo;
-	Value noteLength;
-	Value noteSolfege;
-	Value noteHertz;
-	Value noteStatus;
+	Value 	_noteTempo;
+	Value 	_noteLength;
+	Value 	_noteSolfege;
+	Value 	_noteHertz;
+	Value 	_noteStatus;
+	int 	_noteBeatsRemaining = 0;
 
 public:
 	void Init();
 	void Run();
 	void PluckFrequency(int f);
 };
-
 
 extern SoundManager gSound;

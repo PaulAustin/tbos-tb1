@@ -26,8 +26,6 @@ SOFTWARE.
 
 SoundManager gSound;
 
-int noteBeatsRemaining = 0;
-
 int sNotes[] =
 	{16,  18,  21,  22,  25,
 	 28,    31,   33,   37,   41,   44,   49,
@@ -69,24 +67,24 @@ int sNotesChromatic[] =
 void SoundManager::Init(void)
 {
 	// Default 60 BPM
-	noteTempo.Set(60);
+	_noteTempo.Set(60);
 	// Length of note in 16th notes
-	noteLength.Set(125);
+	_noteLength.Set(125);
 
-	noteLength.HasAsyncSet();
-	noteTempo.HasAsyncSet();
+	_noteLength.HasAsyncSet();
+	_noteTempo.HasAsyncSet();
 
-	gRMap.SetValueObj(kRM_NoteTempo, &noteTempo);
-	gRMap.SetValueObj(kRM_NoteLength, &noteLength);
-	gRMap.SetValueObj(kRM_NoteSolfege, &noteSolfege);
-	gRMap.SetValueObj(kRM_NoteHertz, &noteHertz);
+	gRMap.SetValueObj(kRM_NoteTempo, &_noteTempo);
+	gRMap.SetValueObj(kRM_NoteLength, &_noteLength);
+	gRMap.SetValueObj(kRM_NoteSolfege, &_noteSolfege);
+	gRMap.SetValueObj(kRM_NoteHertz, &_noteHertz);
 }
 
 void SoundManager::PluckFrequency(int f)
 {
 	// Start a new note
-	noteLength.HasAsyncSet();
-	noteBeatsRemaining = noteLength.Get();
+	_noteLength.HasAsyncSet();
+	_noteBeatsRemaining = _noteLength.Get();
 
 	if (f > 0 && f <= 10000) {
 		HW_Timer1_SetFreq(f);
@@ -99,21 +97,21 @@ void SoundManager::PluckFrequency(int f)
 }
 void SoundManager::Run(void)
 {
-	if (noteHertz.HasAsyncSet()) {
-		PluckFrequency(noteHertz.Get());
-	} else if (noteSolfege.HasAsyncSet()) {
-		int n = noteSolfege.Get();
+	if (_noteHertz.HasAsyncSet()) {
+		PluckFrequency(_noteHertz.Get());
+	} else if (_noteSolfege.HasAsyncSet()) {
+		int n = _noteSolfege.Get();
 		if (n < 0 || n >= COUNT_OF(sNotesChromatic))
 			n = 0;
 		PluckFrequency(sNotesChromatic[n]);
 	}
 
-	if (noteBeatsRemaining > 0 ) {
-		noteBeatsRemaining--;
+	if (_noteBeatsRemaining > 0 ) {
+		_noteBeatsRemaining--;
 
-		if (noteBeatsRemaining == 0) {
-			noteHertz.Set(0);
-			noteSolfege.Set(0);
+		if (_noteBeatsRemaining == 0) {
+			_noteHertz.Set(0);
+			_noteSolfege.Set(0);
 			HW_Timer1_SetFreq(0);
 			HW_Timer1_Enable(false);  // Start Playing
 		}
