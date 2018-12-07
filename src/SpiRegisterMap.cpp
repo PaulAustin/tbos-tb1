@@ -25,12 +25,11 @@ SOFTWARE.
 #include "SpiRegisterMap.h"
 #include "Timer.h"
 
-#define TIMER_SPICHAR 		0
-#define SPICHAR_TIMEOUT_ms 	90
+#define SPICHAR_TIMEOUT_ms	90
 #define SPICHAR_ACK			0xAC
 
 RegisterMap gRMap;
-AValue		gDummyValue;
+Value		gDummyValue;
 
 void RegisterMap::Init()
 {
@@ -50,22 +49,17 @@ enum {
 	psGetReg = 2
 };
 
-// static ValueReaderWriter gV8RW;
+static ValueReader gV8Reader;
 static int gReg = 0;
 static int gParam = 0;
 static int gPacketState = psCommand;
-volatile static unsigned int gIntOut = 0;
-static bool s_enumflag=0;
-static int byteAmount = 0;
-static int bytesRemaining = 0;
-static int value = 0;
-
+static int gIntOut = 0;
 //static char  outHack[] = {0x00, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26};
 
 extern "C" void USART0_RX_IRQHandler(void)
 {
-
 	int	inByte;
+
 	if (!(USART0->STATUS & USART_STATUS_RXDATAV)) {
 		// this is not a "RX Data Valid" interrupt
 		return;
@@ -73,7 +67,7 @@ extern "C" void USART0_RX_IRQHandler(void)
 
 	//Checks if the timer has gone over 50 ms
 	//GPIO_Write(IO6,1);
-	if(Time_isTimeOut(TIMER_SPICHAR,SPICHAR_TIMEOUT_ms))
+	if(Time_isTimeout(TIMER_SPICHAR, SPICHAR_TIMEOUT_ms))
 	{
 		gPacketState = psCommand;
 		USART0->CMD |= USART_CMD_CLEARTX | USART_CMD_CLEARRX;	// Clear the TX and RX FIFO's
@@ -84,110 +78,44 @@ extern "C" void USART0_RX_IRQHandler(void)
 
 	inByte = (int8_t)(USART0->RXDATA & 0xFF);	// Get the incoming
 
-	switch(gPacketState)
-	{
-	case psCommand:
-		gReg = (int)inByte;
-		if (gReg > 0 && gReg < kRM_Count) {
-			gPacketState = psSetReg;
-			s_enumflag = 1;
-		}
-		else if (gReg < 0 && gReg > -kRM_Count) {
-			gPacketState = psGetReg;
-			gIntOut = 0;
-			s_enumflag = 1;
-		}
-		else {
-			gReg = 0;
-		}
-		break;
-
-	case psSetReg:
-		if(s_enumflag)
-		{
-			if (inByte == 0)
-			{
-				bytesRemaining = 1;
-				byteAmount = 1;
-				value = 0;
+	if (gV8Reader.ReadV8(inByte)) {
+		switch(gPacketState) {
+		case psCommand:
+			gReg = gV8Reader._v;
+			if (gReg > 0 && gReg < kRM_Count) {
+				gPacketState = psSetReg;
+			} else if (gReg < 0 && gReg > -kRM_Count) {
+				gPacketState = psGetReg;
+				gIntOut = gRMap._registers[-gReg]->Get();
+			} else {
+				gReg = 0;
+				// stay in command state
 			}
-			else if (inByte == EVT8_Int16)
-			{
-					value = 0;
-					bytesRemaining = 2;
-					byteAmount = 2;
-			}
-			else if (inByte == EVT8_Int32)
-			{
-					value = 0;
-					bytesRemaining = 4;
-					byteAmount = 4;
-			}
-			else
-			{
-				// unknown enum
-			}
-			s_enumflag = 0;
-		}
-		else {
-			if(bytesRemaining > 0)
-			{
-				inByte = (inByte & 0x00ff);
-				value = value | (inByte << (8 * (byteAmount-bytesRemaining)));
-				bytesRemaining--;
-			}
-			if(bytesRemaining == 0){
-				gParam = value;
-				gRMap.ASet(gReg, gParam);
-				gReg = gParam = 0;
-				bytesRemaining = byteAmount = 0;
+			break;
+		case psSetReg:
+			// Once the value has been fully read
+			// write it into the map.
+			gParam = gV8Reader.Value();
+			gRMap._registers[gReg]->AsyncSet(gParam);
+			gReg = gParam = 0;
+			gPacketState = psCommand;
+			break;
+		case psGetReg:
+			// Incoming bytes are all single byte values
+			// counting down to 0
+			if (inByte == 0) {
+				// Must have clocked out the last byte.
+				// reset the state and load a zero for the next
+				// output
 				gPacketState = psCommand;
-				gIntOut = SPICHAR_ACK;
-			}
-		}
-		break;
-
-	case psGetReg:
-		if (s_enumflag){
-			// Get the low byte ready to go no matter what the enum is
-			gIntOut = gRMap._registers[-gReg]->Get();
-			// Enum for how many more bytes are coming
-			switch(inByte)
-			{
-			case 0:
-				bytesRemaining = 1;
-				break;
-			case EVT8_Int16:
-				bytesRemaining = 2;
-				break;
-			case EVT8_Int32:
-				bytesRemaining = 4;
-				break;
-			default:
-				gIntOut = SPICHAR_ACK;
-				gPacketState = psCommand;
-				break;
-			}
-			s_enumflag=0;
-		}
-		else {
-			bytesRemaining--;
-			if (bytesRemaining)
+			} else {
+				// line up a new byte to send.
 				gIntOut = gIntOut >> 8;
-			else {
-				gIntOut = SPICHAR_ACK;
-				gPacketState = psCommand;
 			}
+			break;
 		}
-		break;
 	}
-
 
 	USART0->TXDATA = (int8_t) (gIntOut & 0xff);
 	USART_IntClear (USART0, USART_IF_RXDATAV);
-	//GPIO_Write(IO7, 0);
 }
-
-
-
-

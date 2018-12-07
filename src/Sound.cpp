@@ -93,6 +93,7 @@ void SoundManager::PluckFrequency(int f)
 		HW_Timer1_Enable(false);  // Start Playing
 	}
 }
+
 void SoundManager::Run(void)
 {
 	if (_noteHertz.HasAsyncSet()) {
