@@ -1,9 +1,24 @@
-//============================================================================
-//  Title	: BQ24195.c
-//  Desc	: BQ24195 Power Management IC Functions
-//			  Li-Ion Charger, Boost Converter
-//  2017-05-23	Daraius		Created
-//============================================================================
+/*
+Copyright (c) 2018 Trashbots, Inc. - SDG
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 #include "Hardware.h"
 #include "BQ24195.h"
@@ -25,18 +40,15 @@ enum
 	regBQMAX
 };
 
-
 typedef struct
 {
 	uint8_t regaddr;
 	uint8_t regval;
 } BQregs_t;
 
-//2 different bytes for the values (NN)
 BQregs_t m_BQreg[regBQMAX] =
 {	// Power up defaults
 	// regAddr, regVal(reset)
-	// 8 Register Indexes (NN)
 	{0x00, 0x30},
 	{0x01, 0x1B},
 	{0x02, 0x60},
@@ -55,9 +67,7 @@ BQregs_t m_BQreg[regBQMAX] =
 #define BQADDRESS8		(BQADDRESS7<<1)	// bits[7..1]=0x6B + bit[0]=Rd/Wr#
 
 // Register Defaults
-
-//Need 2 8-bit memory addresses to send and recieve addresses
-static uint8_t m_Buf[2];  // All registers are 8 bit
+static uint8_t m_Buf[2];  // All registers are 8 bit one byte for addr, one for value.
 
 int BQReadRegister(int reg)
 {
@@ -68,11 +78,11 @@ int BQReadRegister(int reg)
 		return 0;
 	}
 }
+
 void BQWriteRegister(int reg, int value)
 {
 	I2C0_WriteReg(BQADDRESS8, m_BQreg[reg].regaddr, m_Buf, 1);
 }
-
 
 /*----------------------------------------------------------------------------
 Name: BQ_Init
