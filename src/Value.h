@@ -51,7 +51,58 @@ public:
 		_value = _newValue;
 		return b;
 	}
+	virtual bool HasValues() {
+		return (_value != _newValue);
+	}
+	virtual int NewValueCount() {
+		return (_value != _newValue) ? 1 : 0;
+	}
 };
+
+// Acts as a FiFo
+class FiFoValue : public Value {
+public:
+	uint8_t* _bufferIn;
+	uint8_t* _bufferOut;
+	uint8_t* _bufferStart;
+	uint8_t* _bufferEnd;
+public:
+	FiFoValue(uint8_t* pBuf, int length) {
+		_bufferStart = pBuf;
+		_bufferEnd = _bufferStart + length;
+		_bufferIn = _bufferStart;
+		_bufferOut = _bufferStart;
+	}
+
+	inline uint8_t* NextBufPtr(uint8_t* pCurrent) {
+		if (pCurrent  == _bufferEnd) {
+			return _bufferStart;
+		} else {
+			return pCurrent + 1;
+		}
+	}
+	virtual bool HasValues() {
+		return (_bufferIn != _bufferOut);
+	}
+	virtual void AsyncSet(int value) {
+		*_bufferIn = (char) value;
+		_bufferIn = NextBufPtr(_bufferIn);
+	}
+	virtual int  Get() {
+		if (_bufferOut != _bufferIn) {
+			// Remove an element
+			uint8_t value = *_bufferOut;
+			_bufferOut = NextBufPtr(_bufferOut);
+			return value;
+		} else {
+			// Empty
+			return 0;
+		}
+	}
+};
+
+
+
 
 class TriggerValue : Value {
 //	virtual void Set(int)					{ _newValue = 1; }

@@ -22,18 +22,40 @@ SOFTWARE.
 
 #include "Value.h"
 
+enum NoteEnvelope {
+	kNELegato,	 	// Note played 100% of duration
+	kNEStecato,  	// Note played 50% of duration
+	kNEMarcato,	 	// Note played 66% of duration
+	kNEGlisando, 	// note played 100% with pitch blend from previous note.
+	kNEPortamento,	// Note played 100% with Chomatic slide
+};
+
 class SoundManager {
 private:
+	uint8_t _notebuffer[64];
+private:
+	FiFoValue _noteStream;
 	Value 	_noteTempo;
 	Value 	_noteLength;
 	Value 	_noteSolfege;
 	Value 	_noteHertz;
 	Value 	_noteStatus;
+	int 	_blendFrequency;
+	int 	_targetFrequency;
 	int 	_noteBeatsRemaining;
 
 public:
+
+	SoundManager() :_noteStream(_notebuffer, sizeof(_notebuffer))
+	{
+		_blendFrequency = 0;
+		_targetFrequency = 0;
+		_noteBeatsRemaining = 0;
+	}
+
 	void Init();
 	void Run();
+	void CheckBlend();
 	void PluckFrequency(int f);
 };
 

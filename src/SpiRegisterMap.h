@@ -78,6 +78,9 @@ enum RegMap_t
 	kRM_NoteLength 		= 61,
 	kRM_NoteSolfege 	= 62,	// piano key 1-88
 	kRM_NoteHertz 		= 63,	// 0-14k??
+	kRM_NoteEnvelope 	= 64,	// simple set of ADSR options
+	kRM_NoteBlend 		= 65,	// slide from one note to another
+	kRM_NoteStream 		= 66,	// fifo buffer of notes
 
 	kRM_Gpio 			= 70,	    // BIT FIELD
 	kRM_GpioReadPins	= 71,	    //Output of the pins

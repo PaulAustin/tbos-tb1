@@ -82,6 +82,35 @@ enum SolfegeNotes{
 	ksNoteA6 = 59,
 	ksNoteB6 = 61,
 	ksNoteC6 = 62,
+	ksNoteD6 = 64,
+	ksNoteE6 = 66,
+	ksNoteF6 = 67,
+	ksNoteA7 = 69,
+	ksNoteB7 = 71,
+	ksNoteC7 = 72,
+	ksNoteD7 = 74,
+	ksNoteE7 = 76,
+	ksNoteF7 = 77,
+	ksNoteA8 = 79,
+	ksNoteB8 = 81,
+
+	// Other code for a Note stream
+	ksNoteL0 = 100,		// Sets last-note but does not play it.
+	ksNoteL16th,
+	ksNoteL8th,
+	ksNoteL4th,
+	ksNoteLHalf,
+	ksNoteLWhole,
+	ksNoteLTriplet,  	// Note length is 1/3 twice the current
+	ksNoteLDot,			// Note length is lengthened by 1/2
+	ksNoteLFermata,  	// Note length is doubled
+
+	// Envelope modifiers
+	ksNoteStacatto = 110,
+	ksNoteLagatto,
+	ksNoteGlissando,	// Pitch Blend from last note.
+	ksNoteSetKey,		// All notes will be relative to the new key.
+	ksNoteSetTempo,		// In BPM
 };
 
 void SoundManager::Init(void)
@@ -96,6 +125,7 @@ void SoundManager::Init(void)
 	gRMap.SetValueObj(kRM_NoteLength, &_noteLength);
 	gRMap.SetValueObj(kRM_NoteSolfege, &_noteSolfege);
 	gRMap.SetValueObj(kRM_NoteHertz, &_noteHertz);
+	gRMap.SetValueObj(kRM_NoteStream, &_noteStream);
 }
 
 void SoundManager::PluckFrequency(int f)
@@ -105,12 +135,21 @@ void SoundManager::PluckFrequency(int f)
 	_noteBeatsRemaining = _noteLength.Get();
 
 	if (f > 0 && f <= 10000) {
-		HW_Timer1_SetFreq(f);
+		_targetFrequency = f;
+		HW_Timer1_SetFreq(_blendFrequency);
 		HW_Timer1_Enable(true);  // Start Playing
 	} else {
+		_targetFrequency = 0;
 		// Quiet last for the beat duration as well
 		HW_Timer1_SetFreq(0);
 		HW_Timer1_Enable(false);  // Start Playing
+	}
+}
+void SoundManager::CheckBlend() {
+	int delta = _targetFrequency - _blendFrequency;
+	if (_targetFrequency && delta) {
+		_blendFrequency += (delta * 10) / 50;
+		HW_Timer1_SetFreq(_blendFrequency);
 	}
 }
 
@@ -123,11 +162,16 @@ void SoundManager::Run(void)
 		if (n < 0 || n >= COUNT_OF(sNotesChromatic))
 			n = 0;
 		PluckFrequency(sNotesChromatic[n]);
+	} else if (_noteBeatsRemaining == 0 && _noteStream.HasValues()) {
+		int n = _noteStream.Get();
+		if (n < 0 || n >= COUNT_OF(sNotesChromatic))
+			n = 0;
+		PluckFrequency(sNotesChromatic[n]);
 	}
 
 	if (_noteBeatsRemaining > 0 ) {
 		_noteBeatsRemaining--;
-
+		CheckBlend();
 		if (_noteBeatsRemaining == 0) {
 			_noteHertz.Set(0);
 			_noteSolfege.Set(0);
