@@ -26,8 +26,58 @@ enum NoteEnvelope {
 	kNELegato,	 	// Note played 100% of duration
 	kNEStecato,  	// Note played 50% of duration
 	kNEMarcato,	 	// Note played 66% of duration
-	kNEGlisando, 	// note played 100% with pitch blend from previous note.
-	kNEPortamento,	// Note played 100% with Chomatic slide
+	kNEGlissando, 	// note played 100% with pitch blend from previous note.
+};
+
+enum SolfegeNotes{
+	kSNoteRest,
+	ksNoteA3 = 37,
+	ksNoteASharp3 = 38,
+	ksNoteB3 = 39,
+	ksNoteC4 = 40,
+	ksNoteD4 = 42,
+	ksNoteE4 = 44,
+	ksNoteF4 = 45,
+	ksNoteG4 = 47,
+	ksNoteA5 = 49,
+	ksNoteB5 = 51,
+	ksNoteC5 = 52,
+	ksNoteD5 = 54,
+	ksNoteE5 = 56,
+	ksNoteF5 = 57,
+	ksNoteA6 = 59,
+	ksNoteB6 = 61,
+	ksNoteC6 = 62,
+	ksNoteD6 = 64,
+	ksNoteE6 = 66,
+	ksNoteF6 = 67,
+	ksNoteA7 = 69,
+	ksNoteB7 = 71,
+	ksNoteC7 = 72,
+	ksNoteD7 = 74,
+	ksNoteE7 = 76,
+	ksNoteF7 = 77,
+	ksNoteA8 = 79,
+	ksNoteB8 = 81,
+
+	// Other code for a Note stream
+	ksNoteL0 = 100,		// Sets last-note but does not play it.
+	ksNoteL16th,
+	ksNoteL8th,
+	ksNoteL4th,
+	ksNoteLHalf,
+	ksNoteLWhole,
+	ksNoteLTriplet,  	// Note length is 1/3 twice the current
+	ksNoteLDot,			// Note length is lengthened by 1/2
+	ksNoteLFermata,  	// Note length is doubled
+
+	// Envelope modifiers
+	ksNoteStacatto = 110,
+	ksNoteLagatto,
+	ksNoteMarcato,
+	ksNoteGlissando,	// Pitch Blend from last note.
+	ksNoteSetKey,		// All notes will be relative to the new key.
+	ksNoteSetTempo,		// In BPM in following byte
 };
 
 class SoundManager {
