@@ -402,7 +402,6 @@ void HW_GPIO_SetMode(uint8_t id, uint8_t mode)
 	}
 
 	GPIO_PinModeSet(gpioC[id].port, gpioC[id].pin, pinmode, out);
-
 }
 
 //----------------------------------------------------------------------------

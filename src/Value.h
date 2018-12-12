@@ -75,10 +75,11 @@ public:
 	}
 
 	inline uint8_t* NextBufPtr(uint8_t* pCurrent) {
-		if (pCurrent  == _bufferEnd) {
+		pCurrent += 1;
+		if (pCurrent == _bufferEnd) {
 			return _bufferStart;
 		} else {
-			return pCurrent + 1;
+			return pCurrent;
 		}
 	}
 	virtual bool HasValues() {

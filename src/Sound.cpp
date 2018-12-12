@@ -95,11 +95,62 @@ void SoundManager::PluckFrequency(int f)
 		HW_Timer1_Enable(false);  // Start Playing
 	}
 }
+
 void SoundManager::CheckBlend() {
 	int delta = _targetFrequency - _blendFrequency;
 	if (_targetFrequency && delta) {
 		_blendFrequency += (delta * 10) / 50;
 		HW_Timer1_SetFreq(_blendFrequency);
+	}
+}
+
+void SoundManager::RunSoundStream() {
+
+	int n = _noteStream.Get();
+	if (n >= ksNoteL0 && n < ksNoteLFermata) {
+		int length = _noteLength.Get();
+		switch(n) {
+		case ksNoteL0:
+			length = 0;
+			break;
+		case ksNoteL32nd:
+			length = 16;
+			break;
+		case ksNoteL16th:
+			length = 32;
+			break;
+		case ksNoteL8th:
+			length = 64;
+			break;
+		case ksNoteL4th:
+			length = 128;
+			break;
+		case ksNoteLHalf:
+			length = 256;
+			break;
+		case ksNoteLWhole:
+			length = 512;
+			break;
+		case ksNoteLTriplet:
+			length = (length * 2) / 3;
+			break;
+		case ksNoteLDot:
+			length = length + (length / 2);
+			break;
+		case ksNoteLFermata:
+			length = length * 2;
+			break;
+		}
+		_noteLength.Set(length);
+
+		// if no next then bail for now.
+		if (!_noteStream.HasValues())
+			return;
+		n = _noteStream.Get();
+	}
+
+	if (n >= 0 && n < COUNT_OF(sNotesChromatic)) {
+		PluckFrequency(sNotesChromatic[n]);
 	}
 }
 
@@ -113,16 +164,13 @@ void SoundManager::Run(void)
 			n = 0;
 		PluckFrequency(sNotesChromatic[n]);
 	} else if (_noteBeatsRemaining == 0 && _noteStream.HasValues()) {
-		int n = _noteStream.Get();
-		if (n < 0 || n >= COUNT_OF(sNotesChromatic))
-			n = 0;
-		PluckFrequency(sNotesChromatic[n]);
+		RunSoundStream();
 	}
 
 	if (_noteBeatsRemaining > 0 ) {
 		_noteBeatsRemaining--;
 		CheckBlend();
-		if (_noteBeatsRemaining == 0) {
+		if (_noteBeatsRemaining <= 0) {
 			_noteHertz.Set(0);
 			_noteSolfege.Set(0);
 			HW_Timer1_SetFreq(0);
